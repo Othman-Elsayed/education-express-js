@@ -23,11 +23,7 @@ dbConnect();
 app.use(cookieParser());
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: ["loacl"],
-  })
-);
+app.use(cors());
 
 app.use(morgan("dev"));
 handleSwagger(app);
