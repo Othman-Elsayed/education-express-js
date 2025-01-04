@@ -15,18 +15,18 @@ const studentRoute = require("./routes/studentRoute");
 const subjectRoute = require("./routes/subjectRoute");
 const reviewRoute = require("./routes/reviewRoute");
 const courseRoute = require("./routes/courseRoute");
+const corsOptions = require("./config/corsOptions");
 const handleSwagger = require("./config/swagger");
 require("dotenv")?.config();
 const app = express();
 dbConnect();
 
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
-
-app.use(cors());
-
 app.use(morgan("dev"));
 handleSwagger(app);
+
 app.use(`/api/users`, usersRoute);
 app.use(`/api/auth`, authRoute);
 app.use(`/api/tutor`, tutorRoute);
