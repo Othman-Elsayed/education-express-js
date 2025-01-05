@@ -31,7 +31,7 @@ const register = asyncHandler(async (req, res) => {
 
   //  return result
   const { password, __v, ...result } = user?._doc;
-  return res.json({ ...result, accessToken });
+  return res.json({ ...result, accessToken, refreshToken });
 });
 
 const login = asyncHandler(async (req, res, next) => {
@@ -61,7 +61,10 @@ const login = asyncHandler(async (req, res, next) => {
 
   const { password: pas, __v, ...data } = findUser?._doc;
   return res.json(
-    new ApiSuccess({ ...data, accessToken }, "login successfully.")
+    new ApiSuccess(
+      { ...data, accessToken, refreshToken },
+      "login successfully."
+    )
   );
 });
 

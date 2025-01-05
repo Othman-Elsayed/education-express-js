@@ -4,7 +4,7 @@ const ApiError = require("../utils/apiError");
 
 const updateOne = ({ Schema }) =>
   asyncHandler(async (req, res, next) => {
-    const data = await Schema.findByIdAndUpdate(
+    let data = await Schema.findByIdAndUpdate(
       req?.body?._id,
       { ...req.body },
       {
@@ -14,6 +14,10 @@ const updateOne = ({ Schema }) =>
       }
     );
     if (!data) return next(new ApiError("invalid details."));
+    if (data?._doc) {
+      let { __v, password, ...results } = data?._doc;
+      data = results;
+    }
     return res.json(new ApiSuccess(data, "updated successfully."));
   });
 

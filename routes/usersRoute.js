@@ -3,7 +3,7 @@ const usersController = require("../controller/userController");
 const verifyToken = require("../middlewares/verifyToken");
 const validation = require("../validation/userValidation");
 
-router.use(verifyToken);
+// router.use(verifyToken);
 router
   .route("/")
   .get(usersController.getAllUsers)

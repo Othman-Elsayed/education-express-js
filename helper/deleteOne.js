@@ -4,8 +4,12 @@ const ApiError = require("../utils/apiError");
 
 const deleteOne = ({ Schema, nameIdParam }) =>
   asyncHandler(async (req, res, next) => {
-    const data = await Schema.findByIdAndDelete(req.params[nameIdParam]);
+    let data = await Schema.findByIdAndDelete(req.params[nameIdParam]);
     if (!data) return next(new ApiError("invalid details."));
+    if (data?._doc) {
+      let { __v, password, ...results } = data?._doc;
+      data = results;
+    }
     return res.json(new ApiSuccess(data, "fetch data successfully."));
   });
 
