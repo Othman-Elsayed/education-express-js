@@ -1,4 +1,5 @@
 const Subject = require("../modules/SubjectSchema");
+const asyncHandler = require("express-async-handler");
 const {
   createOne,
   dataOne,
@@ -6,8 +7,12 @@ const {
   deleteOne,
   updateOne,
 } = require("../helper");
+const ApiSuccess = require("../utils/apiSuccess");
 
-const getAllSubjects = dataOne({ Schema: Subject });
+const getAllSubjects = asyncHandler(async (_, res) => {
+  const data = await Subject.find();
+  return res.json(new ApiSuccess(data, "fetch subjects successfully"));
+});
 const createSubject = createOne({ Schema: Subject });
 const updateSubject = updateOne({ Schema: Subject });
 const deleteSubject = deleteOne({ Schema: Subject, nameIdParam: "subjectId" });

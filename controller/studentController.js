@@ -7,7 +7,12 @@ const {
   updateOne,
 } = require("../helper");
 
-const getAllStudents = dataOne({ Schema: Student });
+const getAllStudents = dataOne({
+  Schema: Student,
+  margeObj: "userId",
+  populateName: "userId",
+  populateSelect: "firstName lastName age email phoneNumber gander avatar -_id",
+});
 const createStudent = createOne({ Schema: Student });
 const updateStudent = updateOne({ Schema: Student });
 
