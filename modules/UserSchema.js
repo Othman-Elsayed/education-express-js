@@ -2,61 +2,88 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    firstName: {
+    name: {
       type: String,
-      required: [true, "firstName is required."],
-    },
-    lastName: {
-      type: String,
+      required: [true, "Name is required."],
     },
     email: {
       type: String,
-      required: [true, "email is required."],
+      required: [true, "Email is required."],
       unique: true,
-    },
-    gender: {
-      type: String,
     },
     age: {
       type: Number,
-      required: [true, "age is required."],
+      required: [true, "Age is required."],
     },
     password: {
       type: String,
-      required: [true, "password is required."],
-    },
-    phoneNumber: {
-      type: String,
+      required: [true, "Password is required."],
     },
     role: {
       type: String,
-      required: [
-        true,
-        "Role is required. Please select 'student', 'tutor', or 'admin'.",
-      ],
-      enum: ["student", "tutor", "admin"],
-      validate: {
-        validator: function (value) {
-          return ["student", "tutor", "admin"].includes(value);
-        },
-        message: (props) =>
-          `${props.value} is not a valid role. Please select 'student', 'tutor', or 'admin'.`,
-      },
+      required: [true, "Role is required. Please select 'student', 'tutor'"],
+      enum: ["student", "tutor"],
     },
-    addresses: [
-      {
-        street: { type: String, required: [true, "street is required."] },
-        city: { type: String, required: [true, "city is required."] },
-        country: { type: String, required: [true, "country is required."] },
-        state: { type: String },
-        zip: { type: String },
-        location: { type: String },
-        long: { type: String },
-        lat: { type: String },
-      },
-    ],
+    city: {
+      type: String,
+      required: [true, "City is required."],
+    },
+    country: {
+      type: String,
+      required: [true, "Country is required."],
+    },
+    address: {
+      type: String,
+      required: [true, "Address is required."],
+    },
     avatar: {
       type: String,
+    },
+    phoneNumber: {
+      type: String,
+      required: [true, "Phone number is required."],
+    },
+    studentInfo: {
+      gradeLevel: {
+        type: String,
+      },
+    },
+    tutorInfo: {
+      bio: String,
+      hourlyRate: {
+        type: Number,
+        default: 0,
+      },
+      evaluation: {
+        type: Number,
+        default: 0,
+      },
+      startTutoring: {
+        type: Date,
+      },
+      verifiedAccount: {
+        type: Boolean,
+        default: false,
+      },
+      subjectIds: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Subject",
+        },
+      ],
+      experience: [
+        {
+          name: String,
+          subName: String,
+          yearsCount: Number,
+        },
+      ],
+      education: [
+        {
+          name: { type: String },
+          subName: { type: String },
+        },
+      ],
     },
   },
   { timestamps: true }

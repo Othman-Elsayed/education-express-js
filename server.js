@@ -3,11 +3,9 @@ const cors = require("cors");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-
 const dbConnect = require("./config/db_connect");
 const ApiError = require("./utils/apiError");
 const globalError = require("./middlewares/errorMiddlewares");
-
 const usersRoute = require("./routes/usersRoute");
 const authRoute = require("./routes/authRoute");
 const tutorRoute = require("./routes/tutorRoute");
@@ -15,8 +13,10 @@ const studentRoute = require("./routes/studentRoute");
 const subjectRoute = require("./routes/subjectRoute");
 const reviewRoute = require("./routes/reviewRoute");
 const courseRoute = require("./routes/courseRoute");
+const uploadRoute = require("./routes/uploadRoute");
 const corsOptions = require("./config/corsOptions");
 const handleSwagger = require("./config/swagger");
+
 require("dotenv")?.config();
 const app = express();
 dbConnect();
@@ -27,6 +27,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 handleSwagger(app);
 
+app.use(`/api/upload`, uploadRoute);
 app.use(`/api/users`, usersRoute);
 app.use(`/api/auth`, authRoute);
 app.use(`/api/tutor`, tutorRoute);
@@ -34,7 +35,6 @@ app.use(`/api/student`, studentRoute);
 app.use(`/api/subject`, subjectRoute);
 app.use(`/api/review`, reviewRoute);
 app.use(`/api/course`, courseRoute);
-
 app.all("*", (req, res, next) => {
   next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
 });

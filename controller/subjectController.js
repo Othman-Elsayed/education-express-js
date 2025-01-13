@@ -9,17 +9,20 @@ const {
 } = require("../helper");
 const ApiSuccess = require("../utils/apiSuccess");
 
-const getAllSubjects = asyncHandler(async (_, res) => {
+const getAllSubjects = asyncHandler(async (req, res) => {
   const data = await Subject.find();
   return res.json(new ApiSuccess(data, "fetch subjects successfully"));
 });
-const createSubject = createOne({ Schema: Subject });
-const updateSubject = updateOne({ Schema: Subject });
-const deleteSubject = deleteOne({ Schema: Subject, nameIdParam: "subjectId" });
-const getSingleSubject = singleOne({
-  Schema: Subject,
-  nameIdParam: "subjectId",
+const createSubject = asyncHandler(async (req, res) => {
+  const payload = new Employee({});
+  if (req.file) {
+  }
+  const data = await Subject.create(payload);
+  return res.json(new ApiSuccess(data, "fetch subjects successfully"));
 });
+const updateSubject = () => {};
+const deleteSubject = () => {};
+const getSingleSubject = () => {};
 
 const controllers = {
   getAllSubjects,

@@ -35,7 +35,6 @@ const createUserValidator = [
     .isNumeric()
     .withMessage("phone must be number."),
   check("role").notEmpty().withMessage("role is required."),
-  check("addresses").notEmpty().withMessage("addresses is required."),
 
   validatorMiddlewares,
 ];

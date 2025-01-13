@@ -12,8 +12,13 @@ const {
 const register = asyncHandler(async (req, res) => {
   const body = { ...req.body };
   const hashPassword = await bcrypt.hash(req.body.password, 10);
-  const payload = { ...body, password: hashPassword };
-
+  let payload = { ...body, password: hashPassword };
+  if (payload.role === "student") {
+    payload = { ...payload, tutorInfo: null };
+  }
+  if (payload.role === "tutor") {
+    payload = { ...payload, studentInfo: null };
+  }
   // create user
   const user = await User.create(payload);
 
