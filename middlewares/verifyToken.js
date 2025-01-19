@@ -9,7 +9,7 @@ const verifyToken = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
   jwt.verify(token, process.env.ACCESS_JWT_TOKEN, (err, decoded) => {
-    if (err) return next(new ApiError("invalid token."));
+    if (err) return next(new ApiError("not authorization please log in."));
     next();
   });
 };

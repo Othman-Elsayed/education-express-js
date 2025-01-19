@@ -9,54 +9,51 @@ const {
   generateRefreshToken,
 } = require("../utils/generateToken");
 
-const register = asyncHandler(async (req, res) => {
-  const body = { ...req.body };
-  const hashPassword = await bcrypt.hash(req.body.password, 10);
-  let payload = { ...body, password: hashPassword };
-  if (payload.role === "student") {
-    payload = { ...payload, tutorInfo: null };
-  }
-  if (payload.role === "tutor") {
-    payload = { ...payload, studentInfo: null };
-  }
-  // create user
-  const user = await User.create(payload);
+const saltRounds = 10;
 
-  // generate token
+const register = asyncHandler(async (req, res) => {
+  const { password, role, ...otherFields } = req.body;
+  const hashPassword = await bcrypt.hash(password?.toString(), saltRounds);
+
+  const user = await User.create({
+    ...otherFields,
+    role: role === "admin" ? "student" : role,
+    password: hashPassword,
+  });
+
   const accessToken = generateAccessToken({ id: user._id?.toString() });
   const refreshToken = generateRefreshToken({ id: user._id?.toString() });
 
-  // save cookie
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: true,
     sameSite: "none",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
-
-  //  return result
-  const { password, __v, ...result } = user?._doc;
-  return res.json({ ...result, accessToken, refreshToken });
+  user.password = undefined;
+  user.__v = undefined;
+  return res.json({ ...user?._doc, accessToken, refreshToken });
 });
 
 const login = asyncHandler(async (req, res, next) => {
   const { password, email } = req.body;
-
   const findUser = await User.findOne({ email }).exec();
 
   if (!findUser) {
-    return next(new ApiError("invalid details."));
+    return next(new ApiError("user dose not exist."));
   }
-  const comparePassword = await bcrypt.compare(password, findUser.password);
+  const comparePassword = await bcrypt.compare(
+    password?.toString(),
+    findUser.password?.toString()
+  );
+
   if (!comparePassword) {
-    return next(new ApiError("invalid details."));
+    return next(new ApiError("invalid password or email."));
   }
 
-  // generate token
   const accessToken = generateAccessToken({ id: findUser._id?.toString() });
   const refreshToken = generateRefreshToken({ id: findUser._id?.toString() });
 
-  // save cookie
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: true,
@@ -64,10 +61,11 @@ const login = asyncHandler(async (req, res, next) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  const { password: pas, __v, ...data } = findUser?._doc;
+  findUser.password = undefined;
+  findUser.__v = undefined;
   return res.json(
     new ApiSuccess(
-      { ...data, accessToken, refreshToken },
+      { ...findUser?._doc, accessToken, refreshToken },
       "login successfully."
     )
   );
@@ -76,16 +74,16 @@ const login = asyncHandler(async (req, res, next) => {
 const refreshToken = asyncHandler(async (req, res, next) => {
   const cookie = req.cookies;
   if (!cookie?.refreshToken) {
-    return next(new ApiError("expired refresh token."));
+    return next(new ApiError("No refresh token found. Please log in."));
   }
   jsonwebtoken.verify(
     cookie.refreshToken,
     process.env.REFRESH_JWT_TOKEN,
     async (err, decoded) => {
-      if (err) return next(new ApiError("invalid token."));
+      if (err) return next(new ApiError("invalid refresh token."));
       const findUser = await User.findById(decoded?.data?.id);
       if (!findUser) {
-        return next(new ApiError("invalid details."));
+        return next(new ApiError("user dose not exist."));
       }
       const accessToken = generateAccessToken({ id: findUser._id?.toString() });
       return res.json({

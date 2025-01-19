@@ -13,39 +13,33 @@ const tutorSchema = new mongoose.Schema(
         ref: "Subject",
       },
     ],
-    experience: [
-      {
-        name: { type: String },
-        subName: { type: String },
-        yearsCount: { type: String },
-      },
-    ],
-    education: [
+    educations: [
       {
         name: { type: String },
         subName: { type: String },
       },
     ],
-    bio: {
-      type: String,
-    },
-    location: {
-      type: String,
-    },
-    hourlyRate: {
-      type: Number,
-      required: true,
+    experiences: [
+      {
+        name: { type: String },
+        subName: { type: String },
+        years: { type: String },
+      },
+    ],
+    verifiedAccount: {
+      type: Boolean,
     },
     evaluation: {
       type: Number,
       default: 0,
     },
-    startTutoring: {
+    hourlyRate: {
       type: Number,
       required: true,
     },
-    verifiedAccount: {
-      type: Boolean,
+    startTutoring: {
+      type: Number,
+      required: true,
     },
   },
   { timestamps: true }

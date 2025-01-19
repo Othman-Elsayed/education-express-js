@@ -1,40 +1,40 @@
 const { check } = require("express-validator");
 const validatorMiddlewares = require("../middlewares/validatorMiddlewares");
-const singleValidator = [
-  check("subjectId")
+const byId = [
+  check("id")
     .notEmpty()
-    .withMessage("subject id params is required.")
+    .withMessage("id params is required.")
     .isMongoId()
-    .withMessage("invalid subject id."),
+    .withMessage("invalid id."),
   validatorMiddlewares,
 ];
-const createValidator = [
+const create = [
   check("name").notEmpty().withMessage("name is required."),
   validatorMiddlewares,
 ];
 
-const updateValidator = [
+const update = [
   check("_id")
     .notEmpty()
-    .withMessage("touter id params is required.")
+    .withMessage("id body is required.")
     .isMongoId()
-    .withMessage("invalid touter id."),
+    .withMessage("invalid id."),
   validatorMiddlewares,
 ];
 
-const deleteValidator = [
-  check("subjectId")
+const remove = [
+  check("id")
     .notEmpty()
-    .withMessage("subject id params is required.")
+    .withMessage("id params is required")
     .isMongoId()
-    .withMessage("invalid subject id."),
+    .withMessage("invalid id."),
   validatorMiddlewares,
 ];
 
 const validation = {
-  singleValidator,
-  createValidator,
-  updateValidator,
-  deleteValidator,
+  byId,
+  create,
+  update,
+  remove,
 };
 module.exports = validation;
