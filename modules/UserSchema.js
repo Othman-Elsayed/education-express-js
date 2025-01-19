@@ -35,9 +35,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required."],
     },
-    role: {
+    status: {
       type: String,
-      enum: ["admin", "tutor", "student"],
+      enum: ["tutor", "student"],
     },
   },
   { timestamps: true }

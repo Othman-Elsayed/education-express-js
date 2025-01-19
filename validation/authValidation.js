@@ -10,11 +10,11 @@ const register = [
   check("phoneNumber").notEmpty().withMessage("phoneNumber is required."),
   check("age").notEmpty().withMessage("age is required."),
   check("password").notEmpty().withMessage("password is required."),
-  check("role")
+  check("status")
     .notEmpty()
     .withMessage("select tutor or student is required.")
     .isIn(["tutor", "student"])
-    .withMessage("Role must be one of the following: tutor, student."),
+    .withMessage("status must be one of the following: tutor, student."),
   validatorMiddlewares,
 ];
 

@@ -1,72 +1,64 @@
 const { check } = require("express-validator");
 const validatorMiddlewares = require("../middlewares/validatorMiddlewares");
-const Student = require("../modules/StudentSchema");
 const User = require("../modules/UserSchema");
-const singleValidator = [
-  check("studentId")
+const Student = require("../modules/StudentSchema");
+const byId = [
+  check("id")
     .notEmpty()
-    .withMessage("user id params is required.")
+    .withMessage("id params is required.")
     .isMongoId()
-    .withMessage("invalid user id."),
+    .withMessage("invalid id."),
   validatorMiddlewares,
 ];
-const createValidator = [
+const create = [
   check("userId")
     .notEmpty()
-    .withMessage("user id params is required.")
+    .withMessage("'userId' is required.")
     .isMongoId()
-    .withMessage("invalid user id.")
-    .custom(async (userId) => {
-      const find = await User.findById(userId);
-      if (!find) {
-        throw new Error(`invalid details.`);
+    .withMessage("invalid 'userId'.")
+    .custom(async (val) => {
+      const findUser = await User.findById(val);
+      if (!findUser) {
+        throw new Error(`user dose not exist.`);
       }
-      if (find.role === "tutor") {
-        throw new Error(`cant this account student.`);
+      if (findUser?.status === "tutor") {
+        throw new Error(`invalid details.`);
       }
     })
-    .custom(async (userId) => {
-      const find = await Student.findOne({ userId });
-      if (find) {
-        throw new Error(`invalid details.`);
-      }
+    .custom(async (val) => {
+      const findStudent = await Student.findOne({ userId: val });
+      if (findStudent) throw new Error(`this account already exist.`);
     }),
-
+  check("gradeLevel").notEmpty().withMessage("'gradeLevel' is required."),
   validatorMiddlewares,
 ];
 
-const updateValidator = [
-  check("userId")
-    .optional()
-    .isMongoId()
-    .withMessage("invalid user id.")
-    .custom(async (userId) => {
-      const find = await User.findById(userId);
-      if (!find) {
-        throw new Error(`invalid details.`);
-      }
-    }),
+const update = [
   check("_id")
     .notEmpty()
-    .withMessage("touter id params is required.")
+    .withMessage("id body is required.")
     .isMongoId()
-    .withMessage("invalid touter id."),
+    .withMessage("invalid id.")
+    .custom(async (val) => {
+      const findStudent = await Student.findById(val);
+      if (!findStudent) throw new Error(`student dose not exist.`);
+    }),
   validatorMiddlewares,
 ];
 
-const deleteValidator = [
-  check("studentId")
+const remove = [
+  check("id")
     .notEmpty()
-    .withMessage("user id params is required")
+    .withMessage("id params is required.")
     .isMongoId()
-    .withMessage("invalid user id."),
+    .withMessage("invalid id."),
   validatorMiddlewares,
 ];
 
 const validation = {
-  singleValidator,
-  createValidator,
-  updateValidator,
-  deleteValidator,
+  byId,
+  create,
+  update,
+  remove,
 };
 module.exports = validation;

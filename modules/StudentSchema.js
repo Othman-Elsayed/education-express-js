@@ -6,7 +6,10 @@ const studentSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  gradeLevel: { type: String },
+  gradeLevel: {
+    required: true,
+    type: String,
+  },
 });
 
 module.exports = mongoose.model("Student", studentSchema);

@@ -22,7 +22,7 @@ const createValidator = [
       if (!find) {
         throw new Error(`invalid details.`);
       }
-      if (find?.role !== "tutor") {
+      if (find?.status !== "tutor") {
         throw new Error(`invalid details.`);
       }
     })
@@ -93,7 +93,7 @@ const updateValidator = [
       if (!find) {
         throw new Error(`invalid details.`);
       }
-      if (find?.role !== "tutor") {
+      if (find?.status !== "tutor") {
         throw new Error(`invalid details.`);
       }
     }),
