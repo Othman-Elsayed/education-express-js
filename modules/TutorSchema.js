@@ -7,7 +7,7 @@ const tutorSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    subjectIds: [
+    subjects: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Subject",

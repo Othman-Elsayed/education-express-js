@@ -1,164 +1,115 @@
 const { check } = require("express-validator");
 const validatorMiddlewares = require("../middlewares/validatorMiddlewares");
-const Tutor = require("../modules/TutorSchema");
 const User = require("../modules/UserSchema");
+const Tutor = require("../modules/TutorSchema");
 const Subject = require("../modules/SubjectSchema");
-const singleValidator = [
-  check("userId")
+const Student = require("../modules/StudentSchema");
+const byId = [
+  check("id")
     .notEmpty()
-    .withMessage("user id params is required.")
+    .withMessage("id params is required.")
     .isMongoId()
-    .withMessage("invalid user id."),
+    .withMessage("invalid id."),
   validatorMiddlewares,
 ];
-const createValidator = [
+const create = [
   check("userId")
     .notEmpty()
-    .withMessage("user id params is required.")
+    .withMessage("'userId' is required.")
     .isMongoId()
-    .withMessage("invalid user id.")
-    .custom(async (userId) => {
-      const find = await User.findById(userId);
-      if (!find) {
-        throw new Error(`invalid details.`);
+    .withMessage("invalid 'userId'.")
+    .custom(async (val) => {
+      const findUser = await User.findById(val);
+      if (!findUser) {
+        throw new Error(`user dose not exist.`);
       }
-      if (find?.status !== "tutor") {
-        throw new Error(`invalid details.`);
+      if (findUser?.status === "student") {
+        throw new Error(`must be select account tutor.`);
       }
     })
-    .custom(async (userId) => {
-      const find = await Tutor.findOne({ userId });
-      if (find) {
-        throw new Error(`invalid details.`);
-      }
+    .custom(async (val) => {
+      const findTutor = await Tutor.findOne({ userId: val });
+      if (findTutor) throw new Error(`this tutor account already exist.`);
+    })
+    .custom(async (val) => {
+      const findStudent = await Student.findOne({ userId: val });
+      if (findStudent) throw new Error(`this student account already exist.`);
     }),
-  check("subjectIds")
+  check("subjects")
     .notEmpty()
-    .withMessage("subject ids are required.")
+    .withMessage("subjects ids is required.")
     .isArray()
-    .withMessage("subject ids must be an array.")
-    .custom((subjectIds) => {
-      if (!Array.isArray(subjectIds)) {
-        throw new Error("subject IDs must be an array.");
-      }
-      const uniqueIds = new Set(subjectIds.map((id) => id.toString()));
-      if (uniqueIds.size !== subjectIds.length) {
-        throw new Error("Duplicate subject IDs are not allowed.");
-      }
-
-      return true;
-    }),
-  check("subjectIds.*")
+    .withMessage("subjects ids must be array."),
+  check("subjects.*")
     .isMongoId()
-    .withMessage("invalid subject ids.")
+    .withMessage("Each subject id must be a valid id.")
     .custom(async (id) => {
-      const subject = await Subject.findById(id);
-      if (!subject) {
-        throw new Error(`invalid subject ${id}.`);
+      const exists = await Subject.findById(id);
+      if (!exists) {
+        throw new Error(`Subject with ID ${id} does not exist.`);
       }
     }),
-  check("hourlyRate")
+  check("educations")
     .notEmpty()
-    .withMessage("hourly rate is required.")
-    .isNumeric()
-    .withMessage("hourly rate must be number."),
-  check("evaluation")
-    .optional()
-    .isNumeric()
-    .withMessage("evaluation must be number."),
-  check("startTutoring")
+    .withMessage("'educations' is required.")
+    .isArray()
+    .withMessage("'educations' must be array"),
+  check("experiences")
     .notEmpty()
-    .withMessage("start tutoring is required.")
-    .isNumeric()
-    .withMessage("start tutoring must be number."),
-  check("experience")
-    .optional()
+    .withMessage("'experiences' is required.")
     .isArray()
-    .withMessage("experience must be array of object."),
-  check("education")
-    .optional()
-    .isArray()
-    .withMessage("experience must be array of object."),
-
+    .withMessage("'experiences' must be array"),
+  check("startTutoring").notEmpty().withMessage("'startTutoring' is required."),
   validatorMiddlewares,
 ];
 
-const updateValidator = [
-  check("userId")
-    .optional()
-    .isMongoId()
-    .withMessage("invalid user id.")
-    .custom(async (userId) => {
-      const find = await User.findById(userId);
-      if (!find) {
-        throw new Error(`invalid details.`);
-      }
-      if (find?.status !== "tutor") {
-        throw new Error(`invalid details.`);
-      }
-    }),
-  check("subjectIds")
-    .notEmpty()
-    .withMessage("subject ids are required.")
-    .isArray()
-    .withMessage("subject ids must be an array.")
-    .custom((subjectIds) => {
-      const uniqueIds = new Set(subjectIds.map((id) => id.toString()));
-      if (uniqueIds?.size !== subjectIds?.length) {
-        throw new Error(`duplicate subject ids are not allowed..`);
-      }
-      return true;
-    }),
-  check("subjectIds.*")
-    .isMongoId()
-    .withMessage("invalid subject ids.")
-    .custom(async (id) => {
-      const subject = await Subject.findById(id);
-      if (!subject) {
-        throw new Error(`invalid subject ${id}.`);
-      }
-    }),
+const update = [
   check("_id")
     .notEmpty()
-    .withMessage("touter id params is required.")
+    .withMessage("id body is required.")
     .isMongoId()
-    .withMessage("invalid touter id."),
-  check("hourlyRate")
-    .optional()
-    .isNumeric()
-    .withMessage("hourly rate must be number."),
-  check("evaluation")
-    .optional()
-    .isNumeric()
-    .withMessage("evaluation must be number."),
-  check("startTutoring")
-    .optional()
-    .isNumeric()
-    .withMessage("evaluation must be number."),
-  check("experience")
+    .withMessage("invalid id.")
+    .custom(async (val) => {
+      const findStudent = await Tutor.findById(val);
+      if (!findStudent) throw new Error(`tutor dose not exist.`);
+    }),
+  check("subjects")
     .optional()
     .isArray()
-    .withMessage("experience must be array of object."),
-  check("education")
+    .withMessage("subjects ids must be array."),
+  check("subjects.*")
+    .isMongoId()
+    .withMessage("Each subject id must be a valid id.")
+    .custom(async (id) => {
+      const exists = await Subject.findById(id);
+      if (!exists) {
+        throw new Error(`Subject with ID ${id} does not exist.`);
+      }
+    }),
+  check("educations")
     .optional()
     .isArray()
-    .withMessage("experience must be array of object."),
-
+    .withMessage("'educations' must be array"),
+  check("experiences")
+    .optional()
+    .isArray()
+    .withMessage("'experiences' must be array"),
   validatorMiddlewares,
 ];
 
-const deleteValidator = [
-  check("userId")
+const remove = [
+  check("id")
     .notEmpty()
-    .withMessage("user id params is required")
+    .withMessage("id params is required.")
     .isMongoId()
-    .withMessage("invalid user id."),
+    .withMessage("invalid id."),
   validatorMiddlewares,
 ];
 
-module.exports = {
-  singleValidator,
-  createValidator,
-  updateValidator,
-  deleteValidator,
+const validation = {
+  byId,
+  create,
+  update,
+  remove,
 };
+module.exports = validation;

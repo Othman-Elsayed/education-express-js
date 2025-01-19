@@ -3,13 +3,12 @@ const controller = require("../controller/tutorController");
 const validation = require("../validation/tutorValidation");
 router
   .route("/")
-  .get(controller.getAllTutor)
-  .post(validation.createValidator, controller.createTutor)
-  .put(validation.updateValidator, controller.updateTutor);
+  .get(controller.getAll)
+  .post(validation.create, controller.create)
+  .put(validation.update, controller.update);
 router
-  .route("/:userId")
-  .get(validation.singleValidator, controller.getSingleTutor)
-  .delete(validation.deleteValidator, controller.deleteTutor);
-router.route("/:tutorId/subjects").get(controller.getTutorSubjects);
+  .route("/:id")
+  .get(validation.byId, controller.byId)
+  .delete(validation.remove, controller.remove);
 
 module.exports = router;
