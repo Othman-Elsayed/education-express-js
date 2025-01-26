@@ -1,108 +1,153 @@
 const { check } = require("express-validator");
 const validatorMiddlewares = require("../middlewares/validatorMiddlewares");
-const User = require("../modules/UserSchema");
 const Tutor = require("../modules/TutorSchema");
 const Subject = require("../modules/SubjectSchema");
-const Student = require("../modules/StudentSchema");
+const LevelsGrades = require("../modules/LevelsGradesSchema");
+const SchoolSystems = require("../modules/SchoolSystemsSchema");
+
 const byId = [
   check("id")
     .notEmpty()
     .withMessage("id params is required.")
     .isMongoId()
-    .withMessage("invalid id."),
+    .withMessage("must be valid MongoDB ObjectID."),
   validatorMiddlewares,
 ];
 const create = [
-  check("userId")
-    .notEmpty()
-    .withMessage("'userId' is required.")
-    .isMongoId()
-    .withMessage("invalid 'userId'.")
-    .custom(async (val) => {
-      const findUser = await User.findById(val);
-      if (!findUser) {
-        throw new Error(`user dose not exist.`);
-      }
-      if (findUser?.status === "student") {
-        throw new Error(`must be select account tutor.`);
-      }
-    })
-    .custom(async (val) => {
-      const findTutor = await Tutor.findOne({ userId: val });
-      if (findTutor) throw new Error(`this tutor account already exist.`);
-    })
-    .custom(async (val) => {
-      const findStudent = await Student.findOne({ userId: val });
-      if (findStudent) throw new Error(`this student account already exist.`);
-    }),
+  check("name").notEmpty().withMessage("name is required."),
+  check("email").notEmpty().withMessage("email is required."),
+  check("phoneNumber").notEmpty().withMessage("phoneNumber is required."),
+  check("password").notEmpty().withMessage("password is required."),
+  check("address").notEmpty().withMessage("address is required."),
+  check("country").notEmpty().withMessage("country is required."),
+  check("city").notEmpty().withMessage("city is required."),
+  check("gander").notEmpty().withMessage("gander is required."),
+  check("age").notEmpty().withMessage("age is required."),
+  check("bio").notEmpty().withMessage("bio is required."),
+  check("daysAvailable").notEmpty().withMessage("daysAvailable is required."),
   check("subjects")
     .notEmpty()
-    .withMessage("subjects ids is required.")
+    .withMessage("subjects is required")
     .isArray()
-    .withMessage("subjects ids must be array."),
+    .withMessage("subjects must be array"),
   check("subjects.*")
+    .optional()
     .isMongoId()
-    .withMessage("Each subject id must be a valid id.")
+    .withMessage("All subjects must be valid MongoDB ObjectIDs.")
     .custom(async (id) => {
       const exists = await Subject.findById(id);
       if (!exists) {
         throw new Error(`Subject with ID ${id} does not exist.`);
       }
     }),
+  check("levelsGrades")
+    .notEmpty()
+    .withMessage("levelsGrades is required")
+    .isArray()
+    .withMessage("levelsGrades must be array"),
+  check("levelsGrades.*")
+    .optional()
+    .isMongoId()
+    .withMessage("All levelsGrades must be valid MongoDB ObjectIDs.")
+    .custom(async (id) => {
+      const exists = await LevelsGrades.findById(id);
+      if (!exists) {
+        throw new Error(`levelsGrades with ID ${id} does not exist.`);
+      }
+    }),
+  check("schoolSystem")
+    .notEmpty()
+    .withMessage("schoolSystem is required")
+    .isArray()
+    .withMessage("schoolSystem must be array"),
+  check("schoolSystem.*")
+    .optional()
+    .isMongoId()
+    .withMessage("All schoolSystem must be valid MongoDB ObjectIDs.")
+    .custom(async (id) => {
+      const exists = await SchoolSystems.findById(id);
+      if (!exists) {
+        throw new Error(`schoolSystem with ID ${id} does not exist.`);
+      }
+    }),
   check("educations")
-    .notEmpty()
-    .withMessage("'educations' is required.")
+    .optional()
     .isArray()
-    .withMessage("'educations' must be array"),
+    .withMessage("schoolSystem must be array"),
   check("experiences")
-    .notEmpty()
-    .withMessage("'experiences' is required.")
+    .optional()
     .isArray()
-    .withMessage("'experiences' must be array"),
-  check("startTutoring").notEmpty().withMessage("'startTutoring' is required."),
+    .withMessage("schoolSystem must be array"),
   validatorMiddlewares,
 ];
 
 const update = [
   check("_id")
     .notEmpty()
-    .withMessage("id body is required.")
+    .withMessage("tutor _id is required.")
     .isMongoId()
-    .withMessage("invalid id.")
-    .custom(async (val) => {
-      const findStudent = await Tutor.findById(val);
-      if (!findStudent) throw new Error(`tutor dose not exist.`);
+    .withMessage("tutor _id must be valid MongoDB ObjectID.")
+    .custom(async (id) => {
+      const exists = await Tutor.findById(id);
+      if (!exists) {
+        throw new Error(`Tutor with ID ${id} does not exist.`);
+      }
     }),
-  check("subjects")
-    .optional()
-    .isArray()
-    .withMessage("subjects ids must be array."),
+  check("subjects").optional().isArray().withMessage("subjects must be array"),
   check("subjects.*")
+    .optional()
     .isMongoId()
-    .withMessage("Each subject id must be a valid id.")
+    .withMessage("All subjects must be valid MongoDB ObjectIDs.")
     .custom(async (id) => {
       const exists = await Subject.findById(id);
       if (!exists) {
         throw new Error(`Subject with ID ${id} does not exist.`);
       }
     }),
+  check("levelsGrades")
+    .optional()
+    .isArray()
+    .withMessage("levelsGrades must be array"),
+  check("levelsGrades.*")
+    .optional()
+    .isMongoId()
+    .withMessage("All levelsGrades must be valid MongoDB ObjectIDs.")
+    .custom(async (id) => {
+      const exists = await LevelsGrades.findById(id);
+      if (!exists) {
+        throw new Error(`levelsGrades with ID ${id} does not exist.`);
+      }
+    }),
+  check("schoolSystem")
+    .optional()
+    .isArray()
+    .withMessage("schoolSystem must be array"),
+  check("schoolSystem.*")
+    .optional()
+    .isMongoId()
+    .withMessage("All schoolSystem must be valid MongoDB ObjectIDs.")
+    .custom(async (id) => {
+      const exists = await SchoolSystems.findById(id);
+      if (!exists) {
+        throw new Error(`schoolSystem with ID ${id} does not exist.`);
+      }
+    }),
   check("educations")
     .optional()
     .isArray()
-    .withMessage("'educations' must be array"),
+    .withMessage("schoolSystem must be array"),
   check("experiences")
     .optional()
     .isArray()
-    .withMessage("'experiences' must be array"),
+    .withMessage("schoolSystem must be array"),
   validatorMiddlewares,
 ];
-
 const remove = [
   check("id")
     .notEmpty()
     .withMessage("id params is required.")
     .isMongoId()
-    .withMessage("invalid id."),
+    .withMessage("must be valid MongoDB ObjectID."),
   validatorMiddlewares,
 ];
 

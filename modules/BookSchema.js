@@ -1,24 +1,27 @@
 const mongoose = require("mongoose");
 
-const bookingSchema = new mongoose.Schema(
+const bookSchema = new mongoose.Schema(
   {
-    studentId: {
+    student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
-      required: true,
     },
-    courseId: {
+    tutor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: true,
+      ref: "Tutor",
     },
+    appointments: [
+      {
+        type: String,
+      },
+    ],
     status: {
       type: String,
-      enum: ["pending", "confirmed", "completed"],
+      enum: ["pending", "complete", "rejected"],
       default: "pending",
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Booking", bookingSchema);
+module.exports = mongoose.model("Book", bookSchema);

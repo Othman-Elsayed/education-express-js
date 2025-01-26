@@ -24,8 +24,8 @@ const update = asyncHandler(async (req, res, next) => {
   if (!data) return next(new ApiError("Error update subject."));
   return res.json(new ApiSuccess(data, "Subject updated successfully."));
 });
-const remove = asyncHandler(async (req, res) => {
-  const data = await Subject.findByIdAndDelete(req.params.id);
+const remove = asyncHandler(async (req, res, next) => {
+  const data = await Subject.findByIdAndDelete(req.query.id);
   if (!data) return next(new ApiError("Invalid subject id."));
   return res.json(new ApiSuccess(data, "Subject deleted successfully."));
 });

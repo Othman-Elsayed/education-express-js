@@ -1,6 +1,6 @@
 const router = require("express")?.Router();
-const controller = require("../controller/tutorController");
-const validation = require("../validation/tutorValidation");
+const controller = require("../controller/levelsGradesController");
+const validation = require("../validation/levelsGradesValidation");
 router
   .route("/")
   .get(controller.getAll)

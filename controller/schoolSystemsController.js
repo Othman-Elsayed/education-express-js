@@ -25,7 +25,7 @@ const update = asyncHandler(async (req, res, next) => {
   return res.json(new ApiSuccess(data, "school system updated successfully."));
 });
 const remove = asyncHandler(async (req, res, next) => {
-  const data = await SchoolSystems.findByIdAndDelete(req.params.id);
+  const data = await SchoolSystems.findByIdAndDelete(req.query.id);
   if (!data) return next(new ApiError("Invalid school system id."));
   return res.json(new ApiSuccess(data, "school system deleted successfully."));
 });

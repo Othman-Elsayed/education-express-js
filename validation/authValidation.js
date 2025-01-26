@@ -1,31 +1,35 @@
 const { check } = require("express-validator");
 const validatorMiddlewares = require("../middlewares/validatorMiddlewares");
-
-const register = [
-  check("name").notEmpty().withMessage("name is required."),
-  check("email").notEmpty().withMessage("email is required."),
-  check("address").notEmpty().withMessage("address is required."),
-  check("country").notEmpty().withMessage("country is required."),
-  check("city").notEmpty().withMessage("city is required."),
-  check("phoneNumber").notEmpty().withMessage("phoneNumber is required."),
-  check("age").notEmpty().withMessage("age is required."),
-  check("password").notEmpty().withMessage("password is required."),
-  check("status")
+const Tutor = require("../modules/TutorSchema");
+const Student = require("../modules/StudentSchema");
+const loginTutor = [
+  check("email is required")
     .notEmpty()
-    .withMessage("select tutor or student is required.")
-    .isIn(["tutor", "student"])
-    .withMessage("status must be one of the following: tutor, student."),
-  validatorMiddlewares,
-];
-
-const login = [
-  check("email").notEmpty().withMessage("email is required."),
+    .withMessage("password is required.")
+    .custom(async (email) => {
+      const exists = await Tutor.findOne({ email });
+      if (!exists) {
+        throw new Error(`Tutor does not exist.`);
+      }
+    }),
   check("password").notEmpty().withMessage("password is required."),
   validatorMiddlewares,
 ];
-
+const loginStudent = [
+  check("email is required")
+    .notEmpty()
+    .withMessage("password is required.")
+    .custom(async (email) => {
+      const exists = await Student.findOne({ email });
+      if (!exists) {
+        throw new Error(`student does not exist.`);
+      }
+    }),
+  check("password").notEmpty().withMessage("password is required."),
+  validatorMiddlewares,
+];
 const validation = {
-  register,
-  login,
+  loginTutor,
+  loginStudent,
 };
 module.exports = validation;

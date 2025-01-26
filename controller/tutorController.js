@@ -12,48 +12,37 @@ const hideData = (data) => {
   };
 };
 const getAll = asyncHandler(async (req, res) => {
-  let data = await Schema.find({}).populate("userId", "-password").populate({
-    path: "subjects",
-    select: "name avatar -_id",
-  });
-  data = data?.map((u) => hideData(u));
+  let data = await Schema.find({})
+    .populate("subjects schoolSystems levelsGrades", "name img")
+    .select("-password");
   return res.json(new ApiSuccess(data, "Fetch tutors successfully."));
 });
 const byId = asyncHandler(async (req, res, next) => {
-  let data = await Schema.findById(req.params.id)
-    .populate("userId", "-password")
-    .populate({
-      path: "subjects",
-      select: "name avatar -_id",
-    });
+  let data = await Schema.findById(req.params.id).populate(
+    "subjects schoolSystems levelsGrades",
+    "name img"
+  );
   if (!data) return next(new ApiError("Invalid tutor id."));
-  data = hideData(data);
   return res.json(new ApiSuccess(data, "Fetch tutor successfully."));
 });
 const update = asyncHandler(async (req, res, next) => {
-  const { userId, ...other } = req.body;
-  let data = await Schema.findByIdAndUpdate(req.body._id, other, {
+  let data = await Schema.findByIdAndUpdate(req.body._id, req.body, {
     new: true,
-  })
-    .populate("userId", "-password")
-    .populate({
-      path: "subjects",
-      select: "name avatar -_id",
-    });
+  }).populate("subjects schoolSystems levelsGrades", "name img");
   if (!data) return next(new ApiError("Error update tutor."));
-  data = hideData(data);
   return res.json(new ApiSuccess(data, "Tutor updated successfully."));
 });
 const create = asyncHandler(async (req, res, next) => {
   let data = await Schema.create(req.body);
   if (!data) return next(new ApiError("Error create tutor."));
-  return res.json(new ApiSuccess(undefined, "Tutor created successfully."));
+  return res.json(new ApiSuccess(data, "Tutor created successfully."));
 });
 const remove = asyncHandler(async (req, res, next) => {
-  let data = await Schema.findByIdAndDelete(req.params.id);
-  if (!data) return next(new ApiError("Invalid student id."));
+  let data = await Schema.findByIdAndDelete(req.query.id);
+  if (!data) return next(new ApiError("Invalid tutor id."));
   return res.json(new ApiSuccess(undefined, "Tutor deleted successfully."));
 });
+
 module.exports = {
   update,
   create,

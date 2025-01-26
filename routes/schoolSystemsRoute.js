@@ -5,10 +5,8 @@ router
   .route("/")
   .get(controller.getAll)
   .post(validation.create, controller.create)
-  .put(validation.update, controller.update);
-router
-  .route("/:id")
-  .get(validation.byId, controller.byId)
+  .put(validation.update, controller.update)
   .delete(validation.remove, controller.remove);
+router.route("/:id").get(validation.byId, controller.byId);
 
 module.exports = router;
