@@ -3,9 +3,9 @@ const validatorMiddlewares = require("../middlewares/validatorMiddlewares");
 const Tutor = require("../modules/TutorSchema");
 const Student = require("../modules/StudentSchema");
 const loginTutor = [
-  check("email is required")
+  check("email")
     .notEmpty()
-    .withMessage("password is required.")
+    .withMessage("email is required.")
     .custom(async (email) => {
       const exists = await Tutor.findOne({ email });
       if (!exists) {
@@ -16,9 +16,9 @@ const loginTutor = [
   validatorMiddlewares,
 ];
 const loginStudent = [
-  check("email is required")
+  check("email")
     .notEmpty()
-    .withMessage("password is required.")
+    .withMessage("email is required.")
     .custom(async (email) => {
       const exists = await Student.findOne({ email });
       if (!exists) {

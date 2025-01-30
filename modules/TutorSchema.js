@@ -32,8 +32,6 @@ const tutorSchema = new mongoose.Schema(
     },
     gander: {
       type: String,
-      enum: ["male", "female"],
-      default: "male",
     },
     status: {
       type: String,
@@ -59,9 +57,12 @@ const tutorSchema = new mongoose.Schema(
     hoursJop: {
       type: Number,
     },
-    daysAvailable: {
-      type: String,
-    },
+    daysAvailable: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Schedule",
+      },
+    ],
     subjects: [
       {
         type: mongoose.Schema.Types.ObjectId,

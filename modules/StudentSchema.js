@@ -30,8 +30,6 @@ const studentSchema = new mongoose.Schema({
   },
   gander: {
     type: String,
-    enum: ["male", "female"],
-    default: "male",
   },
   subjects: [
     {

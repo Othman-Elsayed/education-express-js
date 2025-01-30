@@ -21,7 +21,6 @@ const create = [
   check("address").notEmpty().withMessage("address is required."),
   check("country").notEmpty().withMessage("country is required."),
   check("city").notEmpty().withMessage("city is required."),
-  check("gander").notEmpty().withMessage("gander is required."),
   check("subjects").optional().isArray().withMessage("subjects must be array"),
   check("subjects.*")
     .optional()

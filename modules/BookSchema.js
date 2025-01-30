@@ -10,11 +10,7 @@ const bookSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tutor",
     },
-    appointments: [
-      {
-        type: String,
-      },
-    ],
+    schedule: [{ type: mongoose.Schema.Types.ObjectId, ref: "Schedule" }],
     status: {
       type: String,
       enum: ["pending", "complete", "rejected"],

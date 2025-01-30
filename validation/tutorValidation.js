@@ -21,7 +21,6 @@ const create = [
   check("address").notEmpty().withMessage("address is required."),
   check("country").notEmpty().withMessage("country is required."),
   check("city").notEmpty().withMessage("city is required."),
-  check("gander").notEmpty().withMessage("gander is required."),
   check("age").notEmpty().withMessage("age is required."),
   check("bio").notEmpty().withMessage("bio is required."),
   check("daysAvailable").notEmpty().withMessage("daysAvailable is required."),
@@ -55,12 +54,12 @@ const create = [
         throw new Error(`levelsGrades with ID ${id} does not exist.`);
       }
     }),
-  check("schoolSystem")
+  check("schoolSystems")
     .notEmpty()
-    .withMessage("schoolSystem is required")
+    .withMessage("schoolSystems is required")
     .isArray()
-    .withMessage("schoolSystem must be array"),
-  check("schoolSystem.*")
+    .withMessage("schoolSystems must be array"),
+  check("schoolSystems.*")
     .optional()
     .isMongoId()
     .withMessage("All schoolSystem must be valid MongoDB ObjectIDs.")
@@ -118,11 +117,11 @@ const update = [
         throw new Error(`levelsGrades with ID ${id} does not exist.`);
       }
     }),
-  check("schoolSystem")
+  check("schoolSystems")
     .optional()
     .isArray()
-    .withMessage("schoolSystem must be array"),
-  check("schoolSystem.*")
+    .withMessage("schoolSystems must be array"),
+  check("schoolSystems.*")
     .optional()
     .isMongoId()
     .withMessage("All schoolSystem must be valid MongoDB ObjectIDs.")

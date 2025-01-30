@@ -17,7 +17,7 @@ const byId = asyncHandler(async (req, res, next) => {
 const update = asyncHandler(async (req, res, next) => {
   let data = await Student.findByIdAndUpdate(req.body._id, req.body, {
     new: true,
-  }).populate("gradeLevel schoolSystems", "name img");
+  }).populate("gradeLevel schoolSystem", "name img");
   if (!data) return next(new ApiError("Error update student."));
   return res.json(new ApiSuccess(data, "student updated successfully."));
 });

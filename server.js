@@ -10,6 +10,7 @@ const corsOptions = require("./config/corsOptions");
 const tutorRoute = require("./routes/tutorRoute");
 const studentRoute = require("./routes/studentRoute");
 const subjectRoute = require("./routes/subjectRoute");
+const scheduleRoute = require("./routes/scheduleRoute");
 const authRoute = require("./routes/authRoute");
 const schoolSystemsRoute = require("./routes/schoolSystemsRoute");
 const levelsGradeRoute = require("./routes/levelsGradeRoute");
@@ -52,6 +53,7 @@ app.use(`/api/subject`, subjectRoute);
 app.use(`/api/schoolSystems`, schoolSystemsRoute);
 app.use(`/api/levelsGrade`, levelsGradeRoute);
 app.use(`/api/auth`, authRoute);
+app.use(`/api/schedule`, scheduleRoute);
 app.post("/api/upload", upload.single("file"), (req, res) => {
   if (!req.file) {
     return res.status(400).send("No file uploaded");
