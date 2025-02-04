@@ -1,22 +1,43 @@
+// app.js
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const dbConnect = require("./config/db_connect");
-const ApiError = require("./utils/apiError");
-const globalError = require("./middlewares/errorMiddlewares");
 const corsOptions = require("./config/corsOptions");
+const handleSwagger = require("./config/swagger");
+const globalError = require("./middlewares/errorMiddlewares");
+const ApiError = require("./utils/apiError");
+const multer = require("multer");
+const path = require("path");
+const paypal = require("paypal-rest-sdk");
+
+// Routes
 const tutorRoute = require("./routes/tutorRoute");
 const studentRoute = require("./routes/studentRoute");
 const subjectRoute = require("./routes/subjectRoute");
-const scheduleRoute = require("./routes/scheduleRoute");
-const authRoute = require("./routes/authRoute");
 const schoolSystemsRoute = require("./routes/schoolSystemsRoute");
 const levelsGradeRoute = require("./routes/levelsGradeRoute");
-const handleSwagger = require("./config/swagger");
-const multer = require("multer");
-const path = require("path");
+const chatRoute = require("./routes/chatRoute");
+const authRoute = require("./routes/authRoute");
+const lectureRoute = require("./routes/lectureRoute");
+const lectureRequestRoute = require("./routes/lectureRequestRoute");
+
+require("dotenv").config();
+
+const app = express();
+
+// Database connection
+dbConnect();
+
+// Middlewares
+app.use(cors(corsOptions));
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(morgan("dev"));
+
+// File upload setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "./uploads");
@@ -27,33 +48,21 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-require("dotenv")?.config();
-const app = express();
-dbConnect();
-
-app.use(cors(corsOptions));
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-app.use(morgan("dev"));
-
-mongoose.connection.once("open", () => {
-  app.listen(process.env.PORT || 8000, () => {
-    console.log(`success server running on port ${process.env.PORT || "8000"}`);
-  });
-});
-mongoose.connection.on("error", (err) => {
-  console.log("error connection db ->", err);
-});
-
+// Swagger documentation
 handleSwagger(app);
-app.use(`/api/tutor`, tutorRoute);
-app.use(`/api/student`, studentRoute);
-app.use(`/api/subject`, subjectRoute);
-app.use(`/api/schoolSystems`, schoolSystemsRoute);
-app.use(`/api/levelsGrade`, levelsGradeRoute);
-app.use(`/api/auth`, authRoute);
-app.use(`/api/schedule`, scheduleRoute);
+
+// Routes
+app.use("/api/tutor", tutorRoute);
+app.use("/api/student", studentRoute);
+app.use("/api/subject", subjectRoute);
+app.use("/api/schoolSystems", schoolSystemsRoute);
+app.use("/api/levelsGrade", levelsGradeRoute);
+app.use("/api/auth", authRoute);
+app.use("/api/chat", chatRoute);
+app.use("/api/lecture", lectureRoute);
+app.use("/api/lectureRequest", lectureRequestRoute);
+
+// File upload route
 app.post("/api/upload", upload.single("file"), (req, res) => {
   if (!req.file) {
     return res.status(400).send("No file uploaded");
@@ -63,6 +72,8 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
     file: req.file,
   });
 });
+
+// File download route
 app.get("/api/upload/:filename", (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, "uploads", filename);
@@ -74,9 +85,17 @@ app.get("/api/upload/:filename", (req, res) => {
     }
   });
 });
+
+// Handle undefined routes
 app.all("*", (req, res, next) => {
   next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400));
 });
-// const User = require("./modules/SchoolSystemsSchema");
-// User.syncIndexes();
+
+// Global error handler
 app.use(globalError);
+
+// Start the server
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

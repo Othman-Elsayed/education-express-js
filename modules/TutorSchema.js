@@ -60,7 +60,7 @@ const tutorSchema = new mongoose.Schema(
     daysAvailable: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Schedule",
+        ref: "Subject",
       },
     ],
     subjects: [
