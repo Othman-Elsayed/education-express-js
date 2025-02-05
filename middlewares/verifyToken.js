@@ -1,17 +1,41 @@
+const User = require("../modules/User");
 const ApiError = require("../utils/apiError");
 const jwt = require("jsonwebtoken");
-const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization || req.headers.Authorization;
-
-  if (!authHeader?.startsWith("Bearer ")) {
-    return next(new ApiError("authorization not found."));
+const verifyToken = async (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return next(new ApiError(401, "Unauthorized: User not authenticated"));
   }
-
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_JWT_TOKEN, (err, decoded) => {
-    if (err) return next(new ApiError("not authorization please log in."));
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_TOKEN);
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return next(new ApiError("Unauthorized: User not found"));
+    }
+    req.user = user;
     next();
-  });
+  } catch (err) {
+    res.clearCookie("token");
+    return next(new ApiError("Unauthorized: Invalid token"));
+  }
 };
 
-module.exports = verifyToken;
+const verifyRole = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return next(new ApiError("Unauthorized: User not authenticated", 401));
+    }
+    if (allowedRoles.includes(req.user.role)) {
+      next();
+    } else {
+      return next(
+        new ApiError(
+          "Forbidden: You do not have permission to access this resource",
+          403
+        )
+      );
+    }
+  };
+};
+
+module.exports = { verifyToken, verifyRole };

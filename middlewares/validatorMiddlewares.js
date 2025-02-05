@@ -9,7 +9,6 @@ const validatorMiddlewares = (req, res, next) => {
       errors: err.array(),
     });
   }
-
   next();
 };
 
