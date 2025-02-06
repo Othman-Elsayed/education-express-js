@@ -5,7 +5,6 @@ const { verifyToken, verifyRole } = require("../middlewares/verifyToken");
 
 const authController = require("../controller/auth");
 const userController = require("../controller/user");
-const levelController = require("../controller/level");
 const priceController = require("../controller/price");
 const lessonController = require("../controller/lesson");
 const subjectController = require("../controller/subject");
@@ -61,27 +60,6 @@ router.delete(
   educationSystemController.remove
 );
 
-// Level
-router.get("/level", levelController.getAll);
-router.post(
-  "/level",
-  verifyToken,
-  verifyRole(["admin"]),
-  levelController.create
-);
-router.put(
-  "/level",
-  verifyToken,
-  verifyRole(["admin"]),
-  levelController.update
-);
-router.delete(
-  "/level",
-  verifyToken,
-  verifyRole(["admin"]),
-  levelController.remove
-);
-
 // price
 router.get("/price", priceController.getAll);
 router.post(
@@ -105,23 +83,12 @@ router.delete(
 
 // Lesson
 router.get("/lesson", lessonController.getAll);
+// router.get("/lesson/forUser", lessonController.getForUser);
 router.post(
   "/lesson",
   verifyToken,
   verifyRole(["admin", "teacher"]),
   lessonController.create
-);
-router.post(
-  "/lesson/accept",
-  verifyToken,
-  verifyRole(["admin"]),
-  lessonController.getAll
-);
-router.post(
-  "/lesson/reject",
-  verifyToken,
-  verifyRole(["admin"]),
-  lessonController.getAll
 );
 router.put(
   "/lesson",

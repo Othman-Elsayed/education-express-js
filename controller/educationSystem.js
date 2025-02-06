@@ -29,9 +29,7 @@ const update = asyncHandler(async (req, res) => {
   );
 });
 const remove = asyncHandler(async (req, res) => {
-  const educationSystem = await EducationSystem.findByIdAndDelete(
-    req.query._id
-  );
+  await EducationSystem.findByIdAndDelete(req.query._id);
   return res.json(new ApiSuccess("Deleted education system successfully"));
 });
 

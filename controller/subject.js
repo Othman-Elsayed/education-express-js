@@ -12,14 +12,14 @@ const create = asyncHandler(async (req, res) => {
   return res.json(new ApiSuccess("Created subject successfully", subject));
 });
 const update = asyncHandler(async (req, res) => {
-  const subject = await Subject.findByIdAndUpdate(req.body._id, req.body, {
+  const subject = await Subject.findByIdAndUpdate(req.body.id, req.body, {
     new: true,
   });
   subject.__v = undefined;
   return res.json(new ApiSuccess("Updated subject successfully", subject));
 });
 const remove = asyncHandler(async (req, res) => {
-  const subject = await Subject.findByIdAndDelete(req.query._id);
+  await Subject.findByIdAndDelete(req.query.id);
   return res.json(new ApiSuccess("Deleted subject successfully"));
 });
 

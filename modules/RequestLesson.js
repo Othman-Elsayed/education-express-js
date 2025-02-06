@@ -10,7 +10,7 @@ const Lessons = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Price",
     },
-    students: {
+    student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },

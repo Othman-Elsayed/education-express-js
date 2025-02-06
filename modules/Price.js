@@ -1,37 +1,24 @@
 const mongoose = require("mongoose");
 
 const PriceSchema = new mongoose.Schema({
-  system: {
+  educationSystem: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "EducationSystem",
   },
-  levels: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Level",
-    },
-  ],
-  fullFees: [
-    {
-      sessions: String,
-      price: String,
-    },
-  ],
-  teacher: [
-    {
-      sessions: String,
-      price: String,
-    },
-  ],
-  platform: [
-    {
-      sessions: String,
-      price: String,
-    },
-  ],
+  sessions: {
+    type: Number,
+    default: 1,
+  },
+  fullFees: String,
+  teacher: String,
+  platform: String,
+  isGroup: {
+    type: Boolean,
+    default: false,
+  },
   status: {
     type: String,
-    enum: ["oneToOne", "oneToOneBundle", "group"],
+    enum: ["oneToOne", "oneToOneBundle"],
     default: "oneToOne",
   },
 });

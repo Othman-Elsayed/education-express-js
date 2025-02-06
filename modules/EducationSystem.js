@@ -5,7 +5,7 @@ const EducationSystem = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "name is required"],
-      unique: [true, "name must be unique"],
+      unique: [true, "name already exist"],
     },
     bio: {
       type: String,
@@ -13,6 +13,21 @@ const EducationSystem = new mongoose.Schema(
     img: {
       type: String,
     },
+    levels: [
+      {
+        name: {
+          type: String,
+          required: [true, "name is required"],
+          unique: [true, "name already exist"],
+        },
+        bio: {
+          type: String,
+        },
+        img: {
+          type: String,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

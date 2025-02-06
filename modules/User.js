@@ -45,12 +45,6 @@ const UserSchema = new mongoose.Schema(
         ref: "Subject",
       },
     ],
-    levels: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Level",
-      },
-    ],
     evaluation: {
       type: Number,
       default: 0,

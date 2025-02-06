@@ -1,83 +1,86 @@
 const asyncHandler = require("express-async-handler");
-const Lessons = require("../modules/Lessons");
+const Lesson = require("../modules/Lesson");
 const ApiSuccess = require("../utils/apiSuccess");
+const ApiError = require("../utils/apiError");
 
 const getAll = asyncHandler(async (req, res) => {
-  const userId = req.query.userId;
-  const lessons = await Lessons.find({
-    $or: [{ teacher: userId }, { studentsRequests: userId }],
-  })
-    .populate("teacher subject", "name")
-    .select("-__v");
+  let lessons;
+  const isAdmin = Boolean(req.user.role === "ADMIN");
+
+  if (isAdmin) {
+    lessons = Lesson.find({});
+  } else {
+    lessons = Lesson.find({
+      $or: [
+        { teacher: req.query.userId },
+        { studentsRequests: req.query.userId },
+      ],
+    });
+  }
+
+  await lessons.populate("teacher subject", "name").select("-__v");
   return res.json(new ApiSuccess("Fetch lessons successfully.", lessons));
 });
 
-const accept = asyncHandler(async () => {
-  const lesson = await Lessons.findByIdAndUpdate(
-    req.query.id,
-    { status: "accepted" },
-    {
-      new: true,
-    }
-  );
-  lesson.__v = undefined;
-  return res.json(new ApiSuccess("Accepted lesson successfully", lesson));
-});
-
-const reject = asyncHandler(async () => {
-  const lesson = await Lessons.findByIdAndUpdate(
-    req.query.id,
-    { status: "rejected" },
-    {
-      new: true,
-    }
-  );
-  lesson.__v = undefined;
-  return res.json(new ApiSuccess("Rejected lesson successfully", lesson));
-});
-
 const create = asyncHandler(async (req, res) => {
-  const { teacher, price, subject, day, startTime, endTime, isGroup } =
+  const { teacher, price, subject, day, startDate, endDate, isGroup } =
     req.body;
   let payload = {
     teacher,
     price,
     subject,
     day,
-    startTime,
-    endTime,
+    startDate,
+    endDate,
   };
-  if (req.user.role === "teacher" && +req.user.evaluation >= 5) {
+  if (
+    ["teacher", "admin"].includes(req.user.role) &&
+    +req.user.evaluation >= 5
+  ) {
     payload.isGroup = isGroup;
   }
-  const lesson = await Lessons.create(payload);
+  const lesson = await Lesson.create(payload);
   lesson.__v = undefined;
   return res.json(new ApiSuccess("Created lesson successfully", lesson));
 });
 
-const update = asyncHandler(async (req, res) => {
-  const { id, teacher, price, subject, day, startTime, endTime, isGroup } =
-    req.body;
+const update = asyncHandler(async (req, res, next) => {
+  const { _id, subject, day, startDate, endDate, isGroup } = req.body;
   let payload = {
-    teacher,
-    price,
+    _id,
     subject,
     day,
-    startTime,
-    endTime,
+    startDate,
+    endDate,
   };
-  if (req.user.role === "teacher" && +req.user.evaluation >= 5) {
+  if (
+    ["teacher", "admin"].includes(req.user.role) &&
+    +req.user.evaluation >= 5
+  ) {
     payload.isGroup = isGroup;
   }
-  const lesson = await Lessons.findByIdAndUpdate(id, payload, {
+
+  const getLesson = await Lesson.findById(_id).lean();
+  if (getLesson.status === "booked") {
+    return next(new ApiError("You cannot delete booked sessions."));
+  }
+
+  const lesson = await Lesson.findByIdAndUpdate(_id, payload, {
     new: true,
   });
   lesson.__v = undefined;
+
   return res.json(new ApiSuccess("Updated lesson successfully", lesson));
 });
 
-const remove = asyncHandler(async (req, res) => {
-  await Lessons.findByIdAndDelete(req.query.id);
+const remove = asyncHandler(async (req, res, next) => {
+  const id = req.query._id;
+  const getLesson = await Lesson.findById(id).lean();
+
+  if (getLesson.status === "booked") {
+    return next(new ApiError("You cannot delete booked sessions."));
+  }
+  await Lesson.findByIdAndDelete(id);
   return res.json(new ApiSuccess("Deleted lesson successfully"));
 });
 
@@ -86,6 +89,4 @@ module.exports = {
   create,
   update,
   remove,
-  accept,
-  reject,
 };

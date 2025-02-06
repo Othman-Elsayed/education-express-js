@@ -10,6 +10,10 @@ const Lessons = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Price",
     },
+    sessions: {
+      type: Number,
+      default: 0,
+    },
     studentsRequests: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -30,11 +34,11 @@ const Lessons = new mongoose.Schema(
       type: String,
       require: [true, "Day is required"],
     },
-    startTime: {
+    startDate: {
       type: String,
       require: [true, "Start Time is required"],
     },
-    endTime: {
+    endDate: {
       type: String,
       require: [true, "End Time is required"],
     },
@@ -44,10 +48,12 @@ const Lessons = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["init", "pending", "accepted", "rejected"],
-      default: "init",
+      enum: ["booked", "notbooked"],
+      default: "notBooked",
+      trim: true,
+      lowercase: true,
     },
   },
   { timestamps: true }
 );
-module.exports = mongoose.model("Lessons", Lessons);
+module.exports = mongoose.model("Lesson", Lessons);
