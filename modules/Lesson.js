@@ -50,10 +50,19 @@ const Lessons = new mongoose.Schema(
       type: String,
       enum: ["booked", "notbooked"],
       default: "notBooked",
+      lowercaseL: true,
       trim: true,
-      lowercase: true,
     },
   },
-  { timestamps: true }
+  {
+    toJSON: {
+      transform(doc, ret) {
+        delete ret.__v;
+        delete ret.createdAt;
+        delete ret.updatedAt;
+      },
+    },
+    timestamps: true,
+  }
 );
 module.exports = mongoose.model("Lesson", Lessons);

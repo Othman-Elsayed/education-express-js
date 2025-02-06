@@ -62,7 +62,18 @@ const UserSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { timestamps: true }
+  {
+    toJSON: {
+      transform(doc, ret) {
+        delete ret.password;
+        delete ret.__v;
+        delete ret.createdAt;
+        delete ret.updatedAt;
+        delete ret.role;
+      },
+    },
+    timestamps: true,
+  }
 );
 UserSchema.pre("save", function (next) {
   if (["student", "admin"].includes(this.role)) {

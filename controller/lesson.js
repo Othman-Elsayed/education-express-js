@@ -5,7 +5,7 @@ const ApiError = require("../utils/apiError");
 
 const getAll = asyncHandler(async (req, res) => {
   let lessons;
-  const isAdmin = Boolean(req.user.role === "ADMIN");
+  const isAdmin = Boolean(req.user.role?.includes("admin"));
 
   if (isAdmin) {
     lessons = Lesson.find({});
@@ -46,8 +46,15 @@ const create = asyncHandler(async (req, res) => {
 
 const update = asyncHandler(async (req, res, next) => {
   const { _id, subject, day, startDate, endDate, isGroup } = req.body;
+  const findLesson = await Lesson.findById(_id);
+  const isBooked = Boolean(
+    findLesson.status?.toString()?.toLowerCase()?.trim()?.includes("booked")
+  );
+  if (isBooked)
+    return next(
+      new ApiError("The session cannot be updated after it has been booked.")
+    );
   let payload = {
-    _id,
     subject,
     day,
     startDate,
@@ -59,25 +66,19 @@ const update = asyncHandler(async (req, res, next) => {
   ) {
     payload.isGroup = isGroup;
   }
-
-  const getLesson = await Lesson.findById(_id).lean();
-  if (getLesson.status === "booked") {
-    return next(new ApiError("You cannot delete booked sessions."));
-  }
-
   const lesson = await Lesson.findByIdAndUpdate(_id, payload, {
     new: true,
   });
-  lesson.__v = undefined;
-
   return res.json(new ApiSuccess("Updated lesson successfully", lesson));
 });
 
 const remove = asyncHandler(async (req, res, next) => {
   const id = req.query._id;
-  const getLesson = await Lesson.findById(id).lean();
-
-  if (getLesson.status === "booked") {
+  const getLesson = await Lesson.findById(id);
+  const isBooked = Boolean(
+    getLesson.status?.toString()?.toLowerCase()?.trim()?.includes("booked")
+  );
+  if (isBooked) {
     return next(new ApiError("You cannot delete booked sessions."));
   }
   await Lesson.findByIdAndDelete(id);

@@ -6,16 +6,41 @@ const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 
 const register = asyncHandler(async (req, res, next) => {
-  const hasPas = await bcrypt.hash(req.body.password, 10);
+  const {
+    name,
+    email,
+    phoneNumber,
+    password,
+    role,
+    address,
+    country,
+    educationSystems,
+    subjects,
+    age,
+    video,
+    bio,
+    img,
+  } = req.body;
+  const hasPas = await bcrypt.hash(password, 10);
   let newUser = {
-    ...req.body,
-    role:
-      req?.body?.role?.toString()?.toLowerCase("")?.trim("") === "admin"
-        ? "student"
-        : req?.body?.role,
+    name,
+    email,
+    phoneNumber,
+    password,
+    address,
+    country,
+    educationSystems,
+    subjects,
+    age,
+    video,
+    bio,
+    img,
+    role: role?.toString()?.toLowerCase("")?.trim("")?.includes("admin")
+      ? "student"
+      : role,
     password: hasPas,
   };
-  const existingUser = await User.findOne({ email: req.body.email });
+  const existingUser = await User.findOne({ email });
   if (existingUser) {
     return next(new ApiError("User with this email already exists"));
   }
@@ -41,8 +66,6 @@ const login = asyncHandler(async (req, res, next) => {
   res.cookie("token", token, {
     httpOnly: true,
   });
-  findUser.password = undefined;
-  findUser.__v = undefined;
   return res.json(new ApiSuccess("login successfully.", findUser));
 });
 

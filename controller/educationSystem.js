@@ -3,34 +3,41 @@ const EducationSystem = require("../modules/EducationSystem");
 const ApiSuccess = require("../utils/apiSuccess");
 
 const getAll = asyncHandler(async (req, res) => {
-  const educationSystem = await EducationSystem.find().select("-__v");
+  const educationSystem = await EducationSystem.find();
   return res.json(
     new ApiSuccess("Fetch education system successfully.", educationSystem)
   );
 });
 const create = asyncHandler(async (req, res) => {
-  const educationSystem = await EducationSystem.create(req.body);
-  educationSystem.__v = undefined;
+  const { name, bio, img, levels } = req.body;
+  const educationSystem = await EducationSystem.create({
+    name,
+    bio,
+    img,
+    levels,
+  });
   return res.json(
     new ApiSuccess("Created education system successfully", educationSystem)
   );
 });
 const update = asyncHandler(async (req, res) => {
+  const { _id, name, bio, img, levels } = req.body;
   const educationSystem = await EducationSystem.findByIdAndUpdate(
-    req.body._id,
-    req.body,
+    _id,
+    { name, bio, img, levels },
     {
       new: true,
     }
   );
-  educationSystem.__v = undefined;
   return res.json(
     new ApiSuccess("Updated education system successfully", educationSystem)
   );
 });
 const remove = asyncHandler(async (req, res) => {
-  await EducationSystem.findByIdAndDelete(req.query._id);
-  return res.json(new ApiSuccess("Deleted education system successfully"));
+  const data = await EducationSystem.findByIdAndDelete(req.query._id);
+  return res.json(
+    new ApiSuccess("Deleted education system successfully", data)
+  );
 });
 
 module.exports = {
