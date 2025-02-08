@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const verifyToken = async (req, res, next) => {
   const token = req.cookies.token;
   if (!token) {
-    return next(new ApiError(401, "Unauthorized: User not authenticated"));
+    return next(new ApiError("Unauthorized: User not authenticated", 401));
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_TOKEN);

@@ -8,7 +8,6 @@ const globalError = require("./middlewares/errorMiddlewares");
 const ApiError = require("./utils/apiError");
 require("dotenv").config();
 const router = require("./routes/index");
-
 dbConnect();
 
 const app = express();

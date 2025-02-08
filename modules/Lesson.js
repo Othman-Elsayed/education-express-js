@@ -49,7 +49,7 @@ const Lessons = new mongoose.Schema(
     status: {
       type: String,
       enum: ["booked", "notbooked"],
-      default: "notBooked",
+      default: "notbooked",
       lowercaseL: true,
       trim: true,
     },

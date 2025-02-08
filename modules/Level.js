@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
 
-const EducationSystem = new mongoose.Schema(
+const LevelSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: [true, "name is required"],
+      unique: [true, "name must be unique"],
     },
     bio: {
       type: String,
@@ -12,12 +13,6 @@ const EducationSystem = new mongoose.Schema(
     img: {
       type: String,
     },
-    levels: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Level",
-      },
-    ],
   },
   {
     toJSON: {
@@ -30,4 +25,4 @@ const EducationSystem = new mongoose.Schema(
     timestamps: true,
   }
 );
-module.exports = mongoose.model("EducationSystem", EducationSystem);
+module.exports = mongoose.model("Level", LevelSchema);

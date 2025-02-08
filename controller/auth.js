@@ -50,7 +50,7 @@ const register = asyncHandler(async (req, res, next) => {
 
 const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
-  const findUser = await User.findOne({ email }).lean();
+  const findUser = await User.findOne({ email });
   if (!findUser) {
     return next(new ApiError("Invalid credential"));
   }

@@ -9,6 +9,7 @@ const priceController = require("../controller/price");
 const lessonController = require("../controller/lesson");
 const subjectController = require("../controller/subject");
 const bookingController = require("../controller/booking");
+const levelController = require("../controller/level");
 const educationSystemController = require("../controller/educationSystem");
 
 // Auth
@@ -17,13 +18,13 @@ router.post("/login", authController.login);
 
 // Users
 router.get(
-  "/user/students",
+  "/users/students",
   verifyToken,
   verifyRole(["admin"]),
   userController.getStudents
 );
-router.get("/user/teachers", userController.getTeachers);
-router.get("/user/findById", userController.getById);
+router.get("/users/teachers", userController.getTeachers);
+router.get("/user", userController.getById);
 
 // Subject
 router.get("/subjects", subjectController.getAll);
@@ -44,6 +45,27 @@ router.delete(
   verifyToken,
   verifyRole(["admin"]),
   subjectController.remove
+);
+
+// Level
+router.get("/levels", levelController.getAll);
+router.post(
+  "/level",
+  verifyToken,
+  verifyRole(["admin"]),
+  levelController.create
+);
+router.put(
+  "/level",
+  verifyToken,
+  verifyRole(["admin"]),
+  levelController.update
+);
+router.delete(
+  "/level",
+  verifyToken,
+  verifyRole(["admin"]),
+  levelController.remove
 );
 
 // Education System
@@ -89,13 +111,15 @@ router.delete(
 );
 
 // Lesson
-router.get("/lesson", lessonController.getAll);
+router.get("/lessons", verifyToken, lessonController.getAll);
+router.get("/lesson/byId", lessonController.getById);
 router.post(
   "/lesson",
   verifyToken,
   verifyRole(["admin", "teacher"]),
   lessonController.create
 );
+router.post("/lesson/finished", verifyToken, lessonController.finishedLesson);
 router.put(
   "/lesson",
   verifyToken,

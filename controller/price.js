@@ -11,13 +11,13 @@ const create = asyncHandler(async (req, res) => {
   return res.json(new ApiSuccess("Created price successfully", price));
 });
 const update = asyncHandler(async (req, res) => {
-  const price = await Price.findByIdAndUpdate(req.body.id, req.body, {
+  const price = await Price.findByIdAndUpdate(req.body._id, req.body, {
     new: true,
   });
   return res.json(new ApiSuccess("Updated price successfully", price));
 });
 const remove = asyncHandler(async (req, res) => {
-  const price = await Price.findByIdAndDelete(req.query.id);
+  const price = await Price.findByIdAndDelete(req.query._id);
   return res.json(new ApiSuccess("Deleted price successfully", price));
 });
 

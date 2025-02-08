@@ -23,12 +23,13 @@ const sendBooking = asyncHandler(async (req, res, next) => {
   if (!booking) return next(new ApiError("Error connection try again."));
 
   // Update lesson
-  let updateLesson = await Lesson.findById(lesson);
-  updateLesson.studentsRequests = [
-    ...updateLesson.studentsBooked.filter((e) => e !== student),
-    student,
-  ];
-  await updateLesson.save();
+  const updateLesson = await Lesson.findByIdAndUpdate(
+    lesson,
+    {
+      $addToSet: { studentsRequests: student },
+    },
+    { new: true }
+  );
 
   // Results
   return res.json(
@@ -40,7 +41,7 @@ const sendBooking = asyncHandler(async (req, res, next) => {
 });
 
 const acceptedBooking = asyncHandler(async (req, res, next) => {
-  const { student, lesson, booking } = req.body;
+  const { subject, student, lesson, booking } = req.body;
 
   // update Booking
   const newBooking = await Booking.findByIdAndUpdate(
@@ -51,22 +52,20 @@ const acceptedBooking = asyncHandler(async (req, res, next) => {
   if (!newBooking) return next(new ApiError("Error connection try again."));
 
   // Update Lesson
-  let updateLesson = await Lesson.findById(lesson);
-  updateLesson.studentsRequests = [
-    ...updateLesson.studentsRequests.filter((e) => e !== student),
-  ];
-  updateLesson.studentsBooked = [
-    ...updateLesson.studentsBooked.filter((e) => e !== student),
-    student,
-  ];
-  updateLesson.status = "booked";
-  await updateLesson.save();
-
+  const updateLesson = await Lesson.findByIdAndUpdate(
+    lesson,
+    {
+      $pull: { studentsRequests: student },
+      $addToSet: { studentsBooked: student },
+      $set: { status: "booked" },
+    },
+    { new: true }
+  );
   // Results
   return res.json(
     new ApiSuccess("Booking has been accepted successfully. 🎉", {
       updateLesson,
-      booking,
+      newBooking,
     })
   );
 });
