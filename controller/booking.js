@@ -11,14 +11,15 @@ const getBooking = asyncHandler(async (req, res) => {
 });
 
 const sendBooking = asyncHandler(async (req, res, next) => {
-  const { teacher, student, lesson, price } = req.body;
+  const { student, lesson } = req.body;
+  const findLesson = await Lesson.findById(lesson);
 
   // Create a new booking
   const booking = await Booking.create({
-    teacher,
+    teacher: findLesson.teacher,
+    price: findLesson.price,
     student,
     lesson,
-    price,
   });
   if (!booking) return next(new ApiError("Error connection try again."));
 
@@ -41,7 +42,7 @@ const sendBooking = asyncHandler(async (req, res, next) => {
 });
 
 const acceptedBooking = asyncHandler(async (req, res, next) => {
-  const { subject, student, lesson, booking } = req.body;
+  const { student, lesson, booking } = req.body;
 
   // update Booking
   const newBooking = await Booking.findByIdAndUpdate(

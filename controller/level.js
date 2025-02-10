@@ -23,7 +23,7 @@ const update = asyncHandler(async (req, res) => {
   return res.json(new ApiSuccess("Updated level successfully", level));
 });
 const remove = asyncHandler(async (req, res) => {
-  const level = await Level.findByIdAndDelete(req.query.id);
+  const level = await Level.findByIdAndDelete(req.query._id);
   return res.json(new ApiSuccess("Deleted level successfully", level));
 });
 
