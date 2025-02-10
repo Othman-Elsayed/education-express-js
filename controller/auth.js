@@ -52,21 +52,26 @@ const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
   const findUser = await User.findOne({ email });
   if (!findUser) {
-    return next(new ApiError("Invalid credential"));
+    return next(new ApiError("Invalid credentials", 401));
   }
   const isMatch = await bcrypt.compare(password, findUser.password);
   if (!isMatch) {
-    return next(new ApiError("Invalid credential"));
+    return next(new ApiError("Invalid credentials", 401));
   }
   const token = jwt.sign(
     { id: findUser._id, role: findUser.role },
     process.env.JWT_TOKEN,
     { expiresIn: "1h" }
   );
+
   res.cookie("token", token, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production" ? true : false,
+    sameSite: "strict",
+    maxAge: 3600000,
   });
-  return res.json(new ApiSuccess("login successfully.", findUser));
+
+  return res.status(200).json(new ApiSuccess("Login successful", findUser));
 });
 
 module.exports = { register, login };

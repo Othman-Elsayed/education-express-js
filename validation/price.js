@@ -1,12 +1,19 @@
 const { check } = require("express-validator");
 const validatorMiddlewares = require("../middlewares/validatorMiddlewares");
 const Price = require("../modules/Price");
+const EducationSystem = require("../modules/EducationSystem");
 const create = [
   check("educationSystem")
     .notEmpty()
     .withMessage("educationSystem is required.")
     .isMongoId()
-    .withMessage("educationSystem _id must be valid MongoDB ObjectID."),
+    .withMessage("educationSystem _id must be valid MongoDB ObjectID.")
+    .custom(async (id) => {
+      const exists = await EducationSystem.findById(id);
+      if (!exists) {
+        throw new Error(`EducationSystem with ID ${id} does not exist.`);
+      }
+    }),
   check("fullFees").notEmpty().withMessage("fullFees is required."),
   check("platform").notEmpty().withMessage("platform is required."),
   check("teacher").notEmpty().withMessage("teacher is required."),
@@ -23,6 +30,16 @@ const update = [
       const exists = await Price.findById(id);
       if (!exists) {
         throw new Error(`Price with ID ${id} does not exist.`);
+      }
+    }),
+  check("educationSystem")
+    .optional()
+    .isMongoId()
+    .withMessage("educationSystem _id must be valid MongoDB ObjectID.")
+    .custom(async (id) => {
+      const exists = await EducationSystem.findById(id);
+      if (!exists) {
+        throw new Error(`EducationSystem with ID ${id} does not exist.`);
       }
     }),
   validatorMiddlewares,

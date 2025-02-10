@@ -40,6 +40,12 @@ router.get(
 );
 router.get("/users/teachers", userController.getTeachers);
 router.get("/user", userValidation.byId, userController.getById);
+router.put(
+  "/user",
+  userValidation.update,
+  verifyToken,
+  userController.updateProfile
+);
 
 // Subject
 router.get("/subjects", subjectController.getAll);

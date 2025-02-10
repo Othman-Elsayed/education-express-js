@@ -3,7 +3,10 @@ const Price = require("../modules/Price");
 const ApiSuccess = require("../utils/apiSuccess");
 
 const getAll = asyncHandler(async (req, res) => {
-  let prices = await Price.find().populate("educationSystem", "name -_id");
+  let prices = await Price.find().populate({
+    path: "educationSystem",
+    populate: "levels",
+  });
   return res.json(new ApiSuccess("Fetch prices successfully.", prices));
 });
 const create = asyncHandler(async (req, res) => {

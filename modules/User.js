@@ -69,7 +69,6 @@ const UserSchema = new mongoose.Schema(
         delete ret.__v;
         delete ret.createdAt;
         delete ret.updatedAt;
-        delete ret.role;
       },
     },
     timestamps: true,
