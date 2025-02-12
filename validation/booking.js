@@ -13,15 +13,6 @@ const byId = [
   validatorMiddlewares,
 ];
 const send = [
-  check("student")
-    .notEmpty()
-    .withMessage("student id is required.")
-    .custom(async (val) => {
-      const findStudent = await User.findById(val);
-      if (!findStudent && findStudent.role !== "student") {
-        return new Error(`student not found.`);
-      }
-    }),
   check("lesson")
     .notEmpty()
     .withMessage("lesson id is required.")

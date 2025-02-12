@@ -2,7 +2,7 @@ const { check } = require("express-validator");
 const validatorMiddlewares = require("../middlewares/validatorMiddlewares");
 const Subject = require("../modules/Subject");
 const Price = require("../modules/Price");
-const User = require("../modules/Price");
+const User = require("../modules/User");
 const Lesson = require("../modules/Lesson");
 
 const getAll = [
@@ -32,8 +32,8 @@ const create = [
     .withMessage("teacher must be valid MongoDB ObjectID.")
     .custom(async (id) => {
       const exists = await User.findById(id);
-      if (!exists) {
-        throw new Error(`teacher with ID ${id} does not exist.`);
+      if (!exists && exists.role !== "teacher") {
+        return new Error(`invalid teacher id.`);
       }
     }),
   check("price")

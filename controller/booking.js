@@ -3,22 +3,35 @@ const Booking = require("../modules/Booking");
 const Lesson = require("../modules/Lesson");
 const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
+const User = require("../modules/User");
 
 const getBooking = asyncHandler(async (req, res) => {
-  const query = req.user.role === "admin" ? {} : { _id: req.user.id };
-  const bookings = await Booking.find(query);
+  const query =
+    req.user.role === "admin"
+      ? {}
+      : {
+          $or: [{ teacher: req.user._id }, { student: req.user._id }],
+        };
+
+  const bookings = await Booking.find(query).populate(
+    "lesson student teacher price"
+  );
   return res.json(new ApiSuccess("Fetch successfully.", bookings));
 });
 
 const sendBooking = asyncHandler(async (req, res, next) => {
-  const { student, lesson } = req.body;
+  const { lesson } = req.body;
+  const student = req.user._id;
   const findLesson = await Lesson.findById(lesson);
-
+  const findStudent = await User.findById(student);
+  if (!student && findStudent.role !== "student") {
+    return next(new ApiError("Invalid student id."));
+  }
   // Create a new booking
   const booking = await Booking.create({
     teacher: findLesson.teacher,
     price: findLesson.price,
-    student,
+    student: findStudent?._id,
     lesson,
   });
   if (!booking) return next(new ApiError("Error connection try again."));
@@ -47,7 +60,7 @@ const acceptedBooking = asyncHandler(async (req, res, next) => {
   // update Booking
   const newBooking = await Booking.findByIdAndUpdate(
     booking,
-    { status: "completed" },
+    { status: "accepted" },
     { new: true }
   );
   if (!newBooking) return next(new ApiError("Error connection try again."));
@@ -83,15 +96,14 @@ const rejectBooking = asyncHandler(async (req, res, next) => {
   if (!newBooking) return next(new ApiError("Error connection try again."));
 
   // Update Lesson
-  let updateLesson = await Lesson.findById(lesson);
-  updateLesson.studentsRequests = updateLesson.studentsRequests.filter(
-    (e) => e !== student
+  const updateLesson = await Lesson.findByIdAndUpdate(
+    lesson,
+    {
+      $pull: { studentsRequests: student, studentsBooked: student },
+      $set: { status: "notbooked" },
+    },
+    { new: true }
   );
-  updateLesson.studentsBooked = updateLesson.studentsBooked.filter(
-    (e) => e !== student
-  );
-  updateLesson.status = "notbooked";
-  await updateLesson.save();
 
   // Results
   return res.json(
@@ -102,9 +114,27 @@ const rejectBooking = asyncHandler(async (req, res, next) => {
   );
 });
 
+const remove = asyncHandler(async (req, res, next) => {
+  const findBooking = await Booking.findById(req.query._id);
+  if (findBooking.status === "accepted")
+    return next(
+      new ApiError("It will be deleted booking after the end of the session.")
+    );
+
+  // Delete Booking
+  const deleteBooking = await Booking.findByIdAndDelete(req.query._id);
+  if (!deleteBooking) return next(new ApiError("Error connection try again."));
+
+  // Results
+  return res.json(
+    new ApiSuccess("Booking has been rejected successfully. 🎉", deleteBooking)
+  );
+});
+
 module.exports = {
   getBooking,
   sendBooking,
   acceptedBooking,
   rejectBooking,
+  remove,
 };

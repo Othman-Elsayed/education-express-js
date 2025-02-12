@@ -2,6 +2,14 @@ const { check } = require("express-validator");
 const validatorMiddlewares = require("../middlewares/validatorMiddlewares");
 const Price = require("../modules/Price");
 const EducationSystem = require("../modules/EducationSystem");
+const getById = [
+  check("_id")
+    .notEmpty()
+    .withMessage("_id params is required.")
+    .isMongoId()
+    .withMessage("_id must be valid MongoDB ObjectID."),
+  validatorMiddlewares,
+];
 const create = [
   check("educationSystem")
     .notEmpty()
@@ -56,4 +64,5 @@ module.exports = {
   create,
   update,
   remove,
+  getById,
 };

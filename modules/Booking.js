@@ -20,7 +20,7 @@ const BookingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "rejected", "accepted"],
+      enum: ["pending", "cancelled", "rejected", "accepted", "finished"],
       default: "pending",
       lowercaseL: true,
       trim: true,
@@ -30,8 +30,8 @@ const BookingSchema = new mongoose.Schema(
     toJSON: {
       transform(doc, ret) {
         delete ret.__v;
-        delete ret.createdAt;
         delete ret.updatedAt;
+        // delete ret.createdAt;
       },
     },
     timestamps: true,

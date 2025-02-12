@@ -61,17 +61,24 @@ const login = asyncHandler(async (req, res, next) => {
   const token = jwt.sign(
     { id: findUser._id, role: findUser.role },
     process.env.JWT_TOKEN,
-    { expiresIn: "1h" }
+    { expiresIn: "7d" }
   );
 
   res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production" ? true : false,
     sameSite: "strict",
-    maxAge: 3600000,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 
   return res.status(200).json(new ApiSuccess("Login successful", findUser));
 });
-
-module.exports = { register, login };
+const logout = asyncHandler(async (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production" ? true : false,
+    sameSite: "strict",
+  });
+  return res.status(200).json(new ApiSuccess("Logout successful"));
+});
+module.exports = { register, login, logout };

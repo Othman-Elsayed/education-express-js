@@ -3,20 +3,21 @@ const Lesson = require("../modules/Lesson");
 const Price = require("../modules/Price");
 const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
-
+const Booking = require("../modules/Booking");
 const getAll = asyncHandler(async (req, res) => {
-  let lessons = await Lesson.find({
-    $or: [
-      { teacher: req.query.userId },
-      { studentsRequests: req.query.userId },
-    ],
-  }).populate("teacher subject", "name");
-  return res.json(new ApiSuccess("Fetch lessons successfully.", lessons));
+  const { size, page, ...others } = req.query;
+  const lessons = await Lesson.find({ ...others }).populate(
+    "teacher subject studentsBooked",
+    "name"
+  );
+  return res
+    .status(200)
+    .json(new ApiSuccess("Fetch lessons successfully.", lessons));
 });
 
 const getById = asyncHandler(async (req, res) => {
-  let lessons = await Lesson.findById(req.query.id).populate(
-    "teacher subject studentsRequests studentsBooked",
+  let lessons = await Lesson.findById(req.query._id).populate(
+    "teacher subject price studentsBooked",
     "name email img"
   );
 
@@ -169,15 +170,24 @@ const remove = asyncHandler(async (req, res, next) => {
   if (isBooked) {
     return next(new ApiError("You cannot delete booked sessions."));
   }
+  console.log(req.user._id, getLesson.teacher, req.user.role);
+
+  if (
+    req.user.role !== "teacher" ||
+    req.user._id?.toString() !== getLesson.teacher?.toString()
+  ) {
+    return next(new ApiError("You cannot delete other teacher's lessons."));
+  }
+  await Booking.findOneAndDelete({ lesson: id });
   await Lesson.findByIdAndDelete(id);
   return res.json(new ApiSuccess("Deleted lesson successfully"));
 });
 
 module.exports = {
-  getAll,
   getById,
   create,
   update,
   remove,
   finishedLesson,
+  getAll,
 };

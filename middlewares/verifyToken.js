@@ -1,6 +1,7 @@
 const User = require("../modules/User");
 const ApiError = require("../utils/apiError");
 const jwt = require("jsonwebtoken");
+
 const verifyToken = async (req, res, next) => {
   const token = req.cookies.token;
   if (!token) {

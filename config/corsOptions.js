@@ -10,7 +10,7 @@ const corsOptions = {
   //   }
   // },
   origin: true,
-  credentials: true, // Allow cookies and other credentials
+  credentials: true,
   optionsSuccessStatus: 200,
 };
 

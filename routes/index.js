@@ -30,6 +30,7 @@ const { verifyToken, verifyRole } = require("../middlewares/verifyToken");
 // Auth
 router.post("/register", authValidation.register, authController.register);
 router.post("/login", authValidation.login, authController.login);
+router.post("/logout", authController.logout);
 
 // Users
 router.get(
@@ -121,6 +122,7 @@ router.delete(
 
 // price
 router.get("/prices", priceController.getAll);
+router.get("/price", priceValidation.getById, priceController.getById);
 router.post(
   "/price",
   priceValidation.create,
@@ -144,12 +146,7 @@ router.delete(
 );
 
 // Lesson
-router.get(
-  "/lessons",
-  lessonValidation.getAll,
-  verifyToken,
-  lessonController.getAll
-);
+router.get("/lessons", lessonController.getAll);
 router.get("/lesson/byId", lessonValidation.byId, lessonController.getById);
 router.post(
   "/lesson",
@@ -180,7 +177,7 @@ router.delete(
 );
 
 // Booking
-router.get("/booking", verifyToken, bookingController.getBooking);
+router.get("/bookings", verifyToken, bookingController.getBooking);
 router.post(
   "/booking/send",
   bookingValidation.send,
@@ -201,5 +198,5 @@ router.post(
   verifyRole(["admin"]),
   bookingController.rejectBooking
 );
-
+router.delete("/booking", verifyToken, bookingController.remove);
 module.exports = router;

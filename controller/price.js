@@ -9,6 +9,13 @@ const getAll = asyncHandler(async (req, res) => {
   });
   return res.json(new ApiSuccess("Fetch prices successfully.", prices));
 });
+const getById = asyncHandler(async (req, res) => {
+  let prices = await Price.findById(req.query._id).populate({
+    path: "educationSystem",
+    populate: "levels",
+  });
+  return res.json(new ApiSuccess("Fetch prices successfully.", prices));
+});
 const create = asyncHandler(async (req, res) => {
   const price = await Price.create(req.body);
   return res.json(new ApiSuccess("Created price successfully", price));
@@ -29,4 +36,5 @@ module.exports = {
   create,
   update,
   remove,
+  getById,
 };
