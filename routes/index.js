@@ -25,6 +25,12 @@ const levelValidation = require("../validation/level");
 const educationSystemController = require("../controller/educationSystem");
 const educationValidation = require("../validation/educationSystem");
 
+const messageController = require("../controller/message");
+const messageValidation = require("../validation/message");
+
+const chatController = require("../controller/chat");
+const chatValidation = require("../validation/chat");
+
 const { verifyToken, verifyRole } = require("../middlewares/verifyToken");
 
 // Auth
@@ -46,6 +52,50 @@ router.put(
   userValidation.update,
   verifyToken,
   userController.updateProfile
+);
+
+// Chat
+router.get("/chats", verifyToken, chatController.getAll);
+router.post("/chat", verifyToken, chatValidation.byId, chatController.byId);
+router.post("/chat", verifyToken, chatValidation.create, chatController.create);
+router.put("/chat", verifyToken, chatValidation.update, chatController.update);
+router.delete(
+  "/chat",
+  verifyToken,
+  chatValidation.remove,
+  chatController.remove
+);
+
+// Message
+router.get(
+  "/messages",
+  verifyToken,
+  messageValidation.getAll,
+  messageController.getAll
+);
+router.post(
+  "/message",
+  verifyToken,
+  messageValidation.create,
+  messageController.create
+);
+router.put(
+  "/message",
+  verifyToken,
+  messageValidation.update,
+  messageController.update
+);
+router.put(
+  "/messages",
+  verifyToken,
+  messageValidation.updateToRead,
+  messageController.updateToRead
+);
+router.delete(
+  "/message",
+  verifyToken,
+  messageValidation.remove,
+  messageController.remove
 );
 
 // Subject
@@ -147,7 +197,7 @@ router.delete(
 
 // Lesson
 router.get("/lessons", lessonController.getAll);
-router.get("/lesson/byId", lessonValidation.byId, lessonController.getById);
+router.get("/lesson", lessonValidation.byId, lessonController.getById);
 router.post(
   "/lesson",
   lessonValidation.create,

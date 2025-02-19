@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../modules/User");
 const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
+const otpGenerator = require("otp-generator");
 
 const register = asyncHandler(async (req, res, next) => {
   const {
@@ -59,7 +60,7 @@ const login = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Invalid credentials", 401));
   }
   const token = jwt.sign(
-    { id: findUser._id, role: findUser.role },
+    { _id: findUser._id, role: findUser.role },
     process.env.JWT_TOKEN,
     { expiresIn: "7d" }
   );
@@ -70,8 +71,24 @@ const login = asyncHandler(async (req, res, next) => {
     sameSite: "strict",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
-
-  return res.status(200).json(new ApiSuccess("Login successful", findUser));
+  const {
+    __v,
+    password: pas,
+    createdAt,
+    updatedAt,
+    ...result
+  } = findUser?._doc;
+  return res
+    .status(200)
+    .json(new ApiSuccess("Login successfully", { ...result, token }));
+});
+const sendOTP = asyncHandler(async (req, res) => {
+  const newOtp = otpGenerator.generate(6, {
+    upperCaseAlphabets: false,
+    specialChars: false,
+  });
+  const otpExpire = new Date.now() + 10 * 60;
+  return res.status(200).json(new ApiSuccess("Logout successful"));
 });
 const logout = asyncHandler(async (req, res) => {
   res.clearCookie("token", {

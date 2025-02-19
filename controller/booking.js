@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const Booking = require("../modules/Booking");
 const Lesson = require("../modules/Lesson");
+const Chat = require("../modules/Chat");
 const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const User = require("../modules/User");
@@ -55,18 +56,17 @@ const sendBooking = asyncHandler(async (req, res, next) => {
 });
 
 const acceptedBooking = asyncHandler(async (req, res, next) => {
-  const { student, lesson, booking } = req.body;
+  const { teacher, student, lesson, booking } = req.body;
 
   // update Booking
-  const newBooking = await Booking.findByIdAndUpdate(
+  await Booking.findByIdAndUpdate(
     booking,
     { status: "accepted" },
     { new: true }
   );
-  if (!newBooking) return next(new ApiError("Error connection try again."));
 
   // Update Lesson
-  const updateLesson = await Lesson.findByIdAndUpdate(
+  await Lesson.findByIdAndUpdate(
     lesson,
     {
       $pull: { studentsRequests: student },
@@ -75,13 +75,19 @@ const acceptedBooking = asyncHandler(async (req, res, next) => {
     },
     { new: true }
   );
+
+  // Create Chat
+  const findChat = await Chat.findOne({
+    members: { $all: [student, teacher] },
+  });
+  if (!findChat) {
+    await Chat.create({
+      members: [student, teacher],
+    });
+  }
+
   // Results
-  return res.json(
-    new ApiSuccess("Booking has been accepted successfully. 🎉", {
-      updateLesson,
-      newBooking,
-    })
-  );
+  return res.json(new ApiSuccess("Booking has been accepted successfully. 🎉"));
 });
 
 const rejectBooking = asyncHandler(async (req, res, next) => {
