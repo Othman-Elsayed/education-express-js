@@ -10,12 +10,24 @@ const MessageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    replay: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    msgReplay: {
+      type: String,
+    },
     text: {
+      type: String,
+    },
+    img: {
       type: String,
     },
     isRead: {
       type: Boolean,
-      default: true,
+    },
+    edited: {
+      type: Boolean,
     },
   },
   {

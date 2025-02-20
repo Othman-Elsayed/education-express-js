@@ -7,20 +7,22 @@ const getAll = asyncHandler(async (req, res) => {
   return res.json(new ApiSuccess("Fetch messages successfully.", messages));
 });
 const create = asyncHandler(async (req, res) => {
-  const { chat, sender, text, isRead } = req.body;
+  const { chat, sender, msgReplay, replay, text, isRead } = req.body;
   const message = await Message.create({
     chat,
     sender,
     text,
     isRead,
+    replay,
+    msgReplay,
   });
   return res.json(new ApiSuccess("Created message successfully", message));
 });
 const update = asyncHandler(async (req, res) => {
-  const { text } = req.body;
+  const { _id, text } = req.body;
   const message = await Message.findByIdAndUpdate(
     _id,
-    { text, isRead },
+    { text, edited: true },
     {
       new: true,
     }
@@ -30,7 +32,7 @@ const update = asyncHandler(async (req, res) => {
 
 const updateToRead = asyncHandler(async (req, res) => {
   const msgs = await Message.updateMany(
-    { sender: req.query.sender, chat: req.query.chat },
+    { sender: req.query.sender, isRead: false, chat: req.query.chat },
     { $set: { isRead: true } }
   );
   return res.json(new ApiSuccess("read msgs successfully", msgs));

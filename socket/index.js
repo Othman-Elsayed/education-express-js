@@ -3,10 +3,10 @@ let users = [];
 const socketHandler = (socket, io) => {
   console.log("User connected:", socket.id);
 
-  const userOnline = (user) => {
+  const userOnline = (userId) => {
     users = [
-      ...users.filter((e) => e?._id !== user?._id),
-      { ...user, socketId: socket.id },
+      ...users.filter((e) => e?._id !== userId),
+      { userId, socketId: socket.id },
     ];
     io.emit("usersOnline", users);
   };
@@ -17,24 +17,39 @@ const socketHandler = (socket, io) => {
   };
 
   const sendMsg = (msg) => {
-    const receiver = users.find((el) => el?._id === msg?.received);
-
+    const receiver = users.find((el) => el?.userId === msg?.received);
     if (receiver) {
-      io.to(receiver.socketId).emit("msg", { ...msg, isRead: false });
+      io.to(receiver.socketId).emit("getMsgs", msg);
+      io.to(receiver.socketId).emit("getNoti", { ...msg, isRead: false });
+    }
+  };
+
+  const updateMsg = (msg) => {
+    const receiver = users.find((el) => el?.userId === msg?.received);
+    if (receiver) {
+      io.to(receiver.socketId).emit("getMsgs", { ...msg, edited: true });
+    }
+  };
+  const removeMsg = (msg) => {
+    const receiver = users.find((el) => el?.userId === msg?.received);
+    if (receiver) {
+      io.to(receiver.socketId).emit("getMsgs", { ...msg, removed: true });
     }
   };
 
   const seenMsg = (msg) => {
-    const senderUser = users.find((el) => el?._id === msg?.sender);
+    const sender = users.find((el) => el?.userId === msg?.sender);
 
-    if (senderUser) {
-      io.to(senderUser.socketId).emit("msgReed", { ...msg, isRead: true });
+    if (sender) {
+      io.to(sender.socketId).emit("getMsgs", { ...msg, isRead: true });
     }
   };
 
   socket.on("userOnline", userOnline);
   socket.on("sendMsg", sendMsg);
   socket.on("seenMsg", seenMsg);
+  socket.on("removeMsg", removeMsg);
+  socket.on("updateMsg", updateMsg);
   socket.on("disconnect", userOffline);
 };
 
