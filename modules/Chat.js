@@ -8,15 +8,13 @@ const ChatSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    msgsUnread: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Message",
-      },
-    ],
     lastMsg: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",
+    },
+    msgsUnread: {
+      type: Number,
+      default: 0,
     },
   },
   {

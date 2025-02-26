@@ -11,6 +11,7 @@ const { Server } = require("socket.io");
 require("dotenv").config();
 const router = require("./routes/index");
 const socketHandler = require("./socket");
+const path = require("path");
 
 // Connect to the database
 dbConnect();
@@ -23,6 +24,7 @@ const io = new Server(server, {
 });
 
 // Middleware
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());

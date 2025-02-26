@@ -30,6 +30,7 @@ const socketHandler = (socket, io) => {
       io.to(receiver.socketId).emit("getMsgs", { ...msg, edited: true });
     }
   };
+
   const removeMsg = (msg) => {
     const receiver = users.find((el) => el?.userId === msg?.received);
     if (receiver) {
@@ -39,7 +40,6 @@ const socketHandler = (socket, io) => {
 
   const seenMsg = (msg) => {
     const sender = users.find((el) => el?.userId === msg?.sender);
-
     if (sender) {
       io.to(sender.socketId).emit("getMsgs", { ...msg, isRead: true });
     }

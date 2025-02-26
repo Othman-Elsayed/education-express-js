@@ -11,6 +11,15 @@ const byId = [
     .withMessage("_id must be valid MongoDB ObjectID."),
   validatorMiddlewares,
 ];
+const ban = [
+  check("_id")
+    .notEmpty()
+    .withMessage("_id params is required.")
+    .isMongoId()
+    .withMessage("_id must be valid MongoDB ObjectID."),
+  check("ban").notEmpty().withMessage("ban params is required."),
+  validatorMiddlewares,
+];
 const update = [
   check("subject")
     .optional()
@@ -37,4 +46,5 @@ const update = [
 module.exports = {
   byId,
   update,
+  ban,
 };

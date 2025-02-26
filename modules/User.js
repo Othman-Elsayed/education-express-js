@@ -36,7 +36,7 @@ const UserSchema = new mongoose.Schema(
     educationSystems: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "educationSystem",
+        ref: "EducationSystem",
       },
     ],
     subjects: [
@@ -60,6 +60,12 @@ const UserSchema = new mongoose.Schema(
     },
     img: {
       type: String,
+    },
+    ban: {
+      type: String,
+      enum: ["BANED", "NOT_BANED"],
+      default: "NOT_BANED",
+      trim: true,
     },
   },
   {

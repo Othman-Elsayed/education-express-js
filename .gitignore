@@ -11,7 +11,6 @@ node_modules
 dist
 .env
 env
-uploads
 dist-ssr
 *.local
 

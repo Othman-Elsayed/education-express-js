@@ -31,6 +31,12 @@ const messageValidation = require("../validation/message");
 const chatController = require("../controller/chat");
 const chatValidation = require("../validation/chat");
 
+const reviewController = require("../controller/review");
+const reviewValidation = require("../validation/review");
+
+const uploadFile = require("../utils/uploadFile");
+const uploadController = require("../controller/upload");
+
 const { verifyToken, verifyRole } = require("../middlewares/verifyToken");
 
 // Auth
@@ -52,6 +58,13 @@ router.put(
   userValidation.update,
   verifyToken,
   userController.updateProfile
+);
+router.put(
+  "/user/ban",
+  userValidation.ban,
+  verifyToken,
+  verifyRole(["admin"]),
+  userController.banUser
 );
 
 // Chat
@@ -249,4 +262,30 @@ router.post(
   bookingController.rejectBooking
 );
 router.delete("/booking", verifyToken, bookingController.remove);
+
+// Reviews
+router.get("/reviews", reviewValidation.getAll, reviewController.getAll);
+router.post(
+  "/review",
+  reviewValidation.create,
+  verifyToken,
+  reviewController.create
+);
+router.put(
+  "/review",
+  reviewValidation.update,
+  verifyToken,
+  reviewController.update
+);
+router.delete(
+  "/review",
+  reviewValidation.remove,
+  verifyToken,
+  reviewController.remove
+);
+
+// Uploads
+router.post("/upload", uploadFile.single("file"), uploadController.create);
+router.delete("/file", uploadController.remove);
+
 module.exports = router;

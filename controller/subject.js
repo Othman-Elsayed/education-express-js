@@ -3,7 +3,7 @@ const Subject = require("../modules/Subject");
 const ApiSuccess = require("../utils/apiSuccess");
 
 const getAll = asyncHandler(async (req, res) => {
-  const subjects = await Subject.find();
+  const subjects = await Subject.find().populate("img");
   return res.json(new ApiSuccess("Fetch subjects successfully.", subjects));
 });
 const create = asyncHandler(async (req, res) => {
@@ -23,7 +23,7 @@ const update = asyncHandler(async (req, res) => {
   return res.json(new ApiSuccess("Updated subject successfully", subject));
 });
 const remove = asyncHandler(async (req, res) => {
-  const subject = await Subject.findByIdAndDelete(req.query.id);
+  const subject = await Subject.findByIdAndDelete(req.query._id);
   return res.json(new ApiSuccess("Deleted subject successfully", subject));
 });
 
