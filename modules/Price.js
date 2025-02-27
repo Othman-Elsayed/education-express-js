@@ -2,20 +2,27 @@ const mongoose = require("mongoose");
 
 const PriceSchema = new mongoose.Schema(
   {
-    educationSystem: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "EducationSystem",
-    },
+    title: String,
+    fullFees: String,
+    teacher: String,
+    platform: String,
+    educationSystem: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "EducationSystem",
+      },
+    ],
     sessions: {
       type: Number,
       default: 1,
     },
-    fullFees: String,
-    teacher: String,
-    platform: String,
     isGroup: {
       type: Boolean,
       default: false,
+    },
+    img: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Upload",
     },
     status: {
       type: String,
@@ -27,8 +34,6 @@ const PriceSchema = new mongoose.Schema(
     toJSON: {
       transform(doc, ret) {
         delete ret.__v;
-        delete ret.createdAt;
-        delete ret.updatedAt;
       },
     },
     timestamps: true,

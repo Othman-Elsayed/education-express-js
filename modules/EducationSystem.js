@@ -10,7 +10,8 @@ const EducationSystem = new mongoose.Schema(
       type: String,
     },
     img: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Upload",
     },
     levels: [
       {

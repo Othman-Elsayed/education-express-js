@@ -23,20 +23,22 @@ const update = asyncHandler(async (req, res) => {
     }
   );
   return res.json(new ApiSuccess("Updated subject successfully", subject));
-}); 
+});
 const remove = asyncHandler(async (req, res, next) => {
   const subject = await Subject.findById(req.query._id).populate("img");
   if (!subject) {
     return next(new ApiError("Subject not found", 404));
   }
-  if (subject.img) {
+  if (Boolean(subject.img)) {
     req.body.owner = subject.img.owner;
     req.body.fileName = subject.img.fileName;
 
     await uploadController.remove(req, res, next);
   }
   await Subject.findByIdAndDelete(req.query._id);
-  new ApiSuccess("Deleted subject and related file successfully", subject);
+  return res.json(
+    new ApiSuccess("Deleted subject and related file successfully", subject)
+  );
 });
 module.exports = {
   getAll,
