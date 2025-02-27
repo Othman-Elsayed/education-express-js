@@ -3,7 +3,7 @@ const EducationSystem = require("../modules/EducationSystem");
 const ApiSuccess = require("../utils/apiSuccess");
 
 const getAll = asyncHandler(async (req, res) => {
-  const educationSystem = await EducationSystem.find().populate("levels");
+  const educationSystem = await EducationSystem.find().populate("img levels");
   return res.json(
     new ApiSuccess("Fetch education system successfully.", educationSystem)
   );

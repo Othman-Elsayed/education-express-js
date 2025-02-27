@@ -11,15 +11,14 @@ const LevelSchema = new mongoose.Schema(
       type: String,
     },
     img: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Upload",
     },
   },
   {
     toJSON: {
       transform(doc, ret) {
         delete ret.__v;
-        delete ret.createdAt;
-        delete ret.updatedAt;
       },
     },
     timestamps: true,

@@ -3,7 +3,7 @@ const Level = require("../modules/Level");
 const ApiSuccess = require("../utils/apiSuccess");
 
 const getAll = asyncHandler(async (req, res) => {
-  const levels = await Level.find();
+  const levels = await Level.find().populate("img");
   return res.json(new ApiSuccess("Fetch levels successfully.", levels));
 });
 const create = asyncHandler(async (req, res) => {
