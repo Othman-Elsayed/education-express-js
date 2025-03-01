@@ -6,21 +6,28 @@ const ApiError = require("../utils/apiError");
 const Booking = require("../modules/Booking");
 const getAll = asyncHandler(async (req, res) => {
   const { size, page, ...others } = req.query;
-  const lessons = await Lesson.find({ ...others }).populate(
-    "teacher subject studentsBooked",
-    "name"
-  );
+  const lessons = await Lesson.find({ ...others }).populate({
+    path: "teacher subject studentsBooked studentsRequests",
+    select: "name img",
+    populate: {
+      path: "img",
+      select: "fileName",
+    },
+  });
   return res
     .status(200)
     .json(new ApiSuccess("Fetch lessons successfully.", lessons));
 });
 
 const getById = asyncHandler(async (req, res) => {
-  let lessons = await Lesson.findById(req.query._id).populate(
-    "teacher subject price studentsBooked",
-    "name email img"
-  );
-
+  let lessons = await Lesson.findById(req.query._id).populate({
+    path: "teacher subject studentsBooked studentsRequests",
+    select: "name img",
+    populate: {
+      path: "img",
+      select: "fileName",
+    },
+  });
   return res.json(new ApiSuccess("Fetch lessons successfully.", lessons));
 });
 

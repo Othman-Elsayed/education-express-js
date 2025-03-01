@@ -39,6 +39,12 @@ const UserSchema = new mongoose.Schema(
         ref: "EducationSystem",
       },
     ],
+    levels: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Level",
+      },
+    ],
     subjects: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -59,7 +65,8 @@ const UserSchema = new mongoose.Schema(
       type: String,
     },
     img: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Upload",
     },
     ban: {
       type: String,
@@ -85,7 +92,6 @@ UserSchema.pre("save", function (next) {
     this.subjects = undefined;
     this.educationSystems = undefined;
     this.evaluation = undefined;
-    this.levels = undefined;
     this.video = undefined;
   }
   next();

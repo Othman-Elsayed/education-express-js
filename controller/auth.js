@@ -51,7 +51,24 @@ const register = asyncHandler(async (req, res, next) => {
 
 const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
-  const findUser = await User.findOne({ email });
+  const findUser = await User.findOne({ email })
+    .populate("img")
+    .populate({
+      path: "subjects levels",
+      select: "name fileName",
+      populate: {
+        path: "img",
+        select: "fileName",
+      },
+    })
+    .populate({
+      path: "educationSystems",
+      select: "name img levels",
+      populate: {
+        path: "levels img",
+        select: "name fileName",
+      },
+    });
   if (!findUser) {
     return next(new ApiError("Invalid credentials", 401));
   }

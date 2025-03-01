@@ -240,31 +240,43 @@ router.delete(
 );
 
 // Booking
-router.get("/bookings", verifyToken, bookingController.getBooking);
+router.get("/bookings", verifyToken, bookingController.get);
 router.post(
   "/booking/send",
   bookingValidation.send,
   verifyToken,
-  bookingController.sendBooking
+  bookingController.send
 );
 router.post(
   "/booking/accept",
   bookingValidation.accepted,
   verifyToken,
   verifyRole(["admin"]),
-  bookingController.acceptedBooking
+  bookingController.accepted
 );
 router.post(
   "/booking/reject",
   bookingValidation.reject,
   verifyToken,
   verifyRole(["admin"]),
-  bookingController.rejectBooking
+  bookingController.reject
+);
+
+router.post(
+  "/booking/cancel",
+  bookingValidation.cancel,
+  verifyToken,
+  bookingController.cancel
 );
 router.delete("/booking", verifyToken, bookingController.remove);
 
 // Reviews
-router.get("/reviews", reviewValidation.getAll, reviewController.getAll);
+router.get(
+  "/reviews/teacher",
+  reviewValidation.getByTeacher,
+  reviewController.getByTeacher
+);
+router.get("/reviews", reviewController.getAll);
 router.post(
   "/review",
   reviewValidation.create,

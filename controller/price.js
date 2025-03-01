@@ -5,10 +5,25 @@ const ApiError = require("../utils/apiError");
 const uploadController = require("./upload");
 
 const getAll = asyncHandler(async (req, res) => {
-  let prices = await Price.find().populate("img").populate({
-    path: "educationSystem",
-    populate: "levels",
-  });
+  let prices = await Price.find()
+    .populate({
+      path: "educationSystem",
+      populate: {
+        path: "levels",
+        select: "name",
+        populate: {
+          path: "img",
+          select: "fileName",
+        },
+      },
+    })
+    .populate({
+      path: "educationSystem",
+      populate: {
+        path: "img",
+        select: "fileName",
+      },
+    });
   return res.json(new ApiSuccess("Fetch prices successfully.", prices));
 });
 const getById = asyncHandler(async (req, res) => {

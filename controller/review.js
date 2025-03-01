@@ -3,9 +3,24 @@ const Review = require("../modules/Review");
 const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 
+const getByTeacher = asyncHandler(async (req, res) => {
+  const reviews = await Review.find({ teacher: req.query._id })
+    .populate("writer", "name img")
+    .sort({
+      createdAt: -1,
+    });
+  return res.json(new ApiSuccess("Fetch reviews successfully.", reviews));
+});
 const getAll = asyncHandler(async (req, res) => {
-  const reviews = await Review.find({ teacher: req.query.teacher })
-    .populate("writer", "name")
+  const reviews = await Review.find({})
+    .populate({
+      path: "writer teacher",
+      select: "name img",
+      populate: {
+        path: "img",
+        select: "fileName",
+      },
+    })
     .sort({
       createdAt: -1,
     });
@@ -54,4 +69,5 @@ module.exports = {
   create,
   update,
   remove,
+  getByTeacher,
 };

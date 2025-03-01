@@ -45,7 +45,31 @@ const socketHandler = (socket, io) => {
     }
   };
 
+  const sendBooking = (data) => {
+    const teacher = users.find((el) => el?.userId === data.teacher?._id);
+    const admin = users.find((el) => el?.userId === "67a54300ca00dfbda18a47b1");
+    if (teacher) {
+      io.to(teacher.socketId).emit("getBooking", data);
+    }
+    if (admin) {
+      io.to(admin.socketId).emit("getBooking", data);
+    }
+  };
+
+  const cancelBooking = (data) => {
+    const teacher = users.find((el) => el?.userId === data.teacher?._id);
+    const admin = users.find((el) => el?.userId === "67a54300ca00dfbda18a47b1");
+    if (teacher) {
+      io.to(teacher.socketId).emit("getBooking", { ...data, canceled: true });
+    }
+    if (admin) {
+      io.to(admin.socketId).emit("getBooking", { ...data, canceled: true });
+    }
+  };
+
   socket.on("userOnline", userOnline);
+  socket.on("sendBooking", sendBooking);
+  socket.on("cancelBooking", cancelBooking);
   socket.on("sendMsg", sendMsg);
   socket.on("seenMsg", seenMsg);
   socket.on("removeMsg", removeMsg);

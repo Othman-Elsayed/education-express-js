@@ -54,6 +54,18 @@ const accepted = [
     }),
   validatorMiddlewares,
 ];
+const cancel = [
+  check("lesson")
+    .notEmpty()
+    .withMessage("lesson id is required.")
+    .custom(async (val) => {
+      const findLesson = await Lesson.findById(val);
+      if (!findLesson) {
+        return new Error(`Lesson not found.`);
+      }
+    }),
+  validatorMiddlewares,
+];
 const reject = [
   check("student")
     .notEmpty()
@@ -89,4 +101,5 @@ module.exports = {
   send,
   accepted,
   reject,
+  cancel,
 };

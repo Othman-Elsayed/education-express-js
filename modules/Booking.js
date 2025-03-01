@@ -22,7 +22,7 @@ const BookingSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "cancelled", "rejected", "accepted", "finished"],
       default: "pending",
-      lowercaseL: true,
+      lowercase: true,
       trim: true,
     },
   },

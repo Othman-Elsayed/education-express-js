@@ -65,10 +65,10 @@ const update = [
   validatorMiddlewares,
 ];
 
-const getAll = [
-  check("teacher")
+const getByTeacher = [
+  check("_id")
     .notEmpty()
-    .withMessage("review teacher params is required.")
+    .withMessage("review teacher _id params is required.")
     .isMongoId()
     .withMessage("must be valid MongoDB ObjectID.")
     .custom(async (id) => {
@@ -93,5 +93,5 @@ module.exports = {
   create,
   update,
   remove,
-  getAll,
+  getByTeacher,
 };

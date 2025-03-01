@@ -12,18 +12,35 @@ const getTeachers = asyncHandler(async (req, res) => {
         select: "name description -_id",
       },
     })
-    .populate("subjects", "name -_id")
+    .populate("subjects levels img")
     .exec();
   return res.json(new ApiSuccess("fetch users successfully", users));
 });
 
 const getStudents = asyncHandler(async (req, res) => {
-  let users = await User.find({ role: "student" });
+  let users = await User.find({ role: "student" }).populate("img");
   return res.json(new ApiSuccess("fetch users successfully", users));
 });
 
 const getById = asyncHandler(async (req, res) => {
-  let user = await User.findOne({ _id: req.query._id });
+  let user = await User.findOne({ _id: req.query._id })
+    .populate("img")
+    .populate({
+      path: "subjects levels",
+      select: "name fileName",
+      populate: {
+        path: "img",
+        select: "fileName",
+      },
+    })
+    .populate({
+      path: "educationSystems",
+      select: "name img levels",
+      populate: {
+        path: "levels img",
+        select: "name fileName",
+      },
+    });
   return res.json(new ApiSuccess("fetch users successfully", user));
 });
 
@@ -39,6 +56,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     subjects,
     img,
     video,
+    levels,
   } = req.body;
   const _id = req.user._id;
 
@@ -52,6 +70,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     phoneNumber,
     country,
     img,
+    levels,
   };
 
   if (user.role === "teacher") {
@@ -62,7 +81,24 @@ const updateProfile = asyncHandler(async (req, res) => {
       video,
     };
   }
-  const updateUser = await User.findByIdAndUpdate(_id, payload, { new: true });
+  const updateUser = await User.findByIdAndUpdate(_id, payload, { new: true })
+    .populate("img")
+    .populate({
+      path: "subjects levels",
+      select: "name fileName",
+      populate: {
+        path: "img",
+        select: "fileName",
+      },
+    })
+    .populate({
+      path: "educationSystems",
+      select: "name img levels",
+      populate: {
+        path: "levels img",
+        select: "name fileName",
+      },
+    });
   return res.json(new ApiSuccess("fetch users successfully", updateUser));
 });
 
