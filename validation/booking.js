@@ -19,7 +19,7 @@ const send = [
     .custom(async (val) => {
       const findLesson = await Lesson.findById(val);
       if (!findLesson) {
-        return new Error(`Lesson not found.`);
+        throw new Error(`Lesson not found.`);
       }
     }),
   validatorMiddlewares,
@@ -31,7 +31,7 @@ const accepted = [
     .custom(async (val) => {
       const findStudent = await User.findById(val);
       if (!findStudent && findStudent.role !== "student") {
-        return new Error(`student not found.`);
+        throw new Error(`student not found.`);
       }
     }),
   check("lesson")
@@ -40,7 +40,7 @@ const accepted = [
     .custom(async (val) => {
       const findLesson = await Lesson.findById(val);
       if (!findLesson) {
-        return new Error(`Lesson not found.`);
+        throw new Error(`Lesson not found.`);
       }
     }),
   check("booking")
@@ -49,7 +49,7 @@ const accepted = [
     .custom(async (val) => {
       const findBooking = await Booking.findById(val);
       if (!findBooking) {
-        return new Error(`Booking not found.`);
+        throw new Error(`Booking not found.`);
       }
     }),
   validatorMiddlewares,
@@ -61,7 +61,7 @@ const cancel = [
     .custom(async (val) => {
       const findLesson = await Lesson.findById(val);
       if (!findLesson) {
-        return new Error(`Lesson not found.`);
+        throw new Error(`Lesson not found.`);
       }
     }),
   validatorMiddlewares,
@@ -73,7 +73,16 @@ const reject = [
     .custom(async (val) => {
       const findStudent = await User.findById(val);
       if (!findStudent && findStudent.role !== "student") {
-        return new Error(`student not found.`);
+        throw new Error(`student not found.`);
+      }
+    }),
+  check("teacher")
+    .notEmpty()
+    .withMessage("teacher id is required.")
+    .custom(async (val) => {
+      const findTeacher = await User.findById(val);
+      if (!findTeacher && findTeacher.role !== "teacher") {
+        throw new Error(`teacher not found.`);
       }
     }),
   check("lesson")
@@ -82,7 +91,7 @@ const reject = [
     .custom(async (val) => {
       const findLesson = await Lesson.findById(val);
       if (!findLesson) {
-        return new Error(`Lesson not found.`);
+        throw new Error(`Lesson not found.`);
       }
     }),
   check("booking")
@@ -91,7 +100,7 @@ const reject = [
     .custom(async (val) => {
       const findBooking = await Booking.findById(val);
       if (!findBooking) {
-        return new Error(`Booking not found.`);
+        throw new Error(`Booking not found.`);
       }
     }),
   validatorMiddlewares,

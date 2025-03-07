@@ -209,7 +209,9 @@ router.delete(
 );
 
 // Lesson
-router.get("/lessons", lessonController.getAll);
+router.get("/lessons/teacher", verifyToken, lessonController.getByTeacher);
+router.get("/lessons/student", verifyToken, lessonController.getByStudent);
+router.get("/lessons/teacher/profile", lessonController.getShowInProfile);
 router.get("/lesson", lessonValidation.byId, lessonController.getById);
 router.post(
   "/lesson",
@@ -241,6 +243,7 @@ router.delete(
 
 // Booking
 router.get("/bookings", verifyToken, bookingController.get);
+router.get("/booking", verifyToken, bookingController.byId);
 router.post(
   "/booking/send",
   bookingValidation.send,
@@ -258,7 +261,7 @@ router.post(
   "/booking/reject",
   bookingValidation.reject,
   verifyToken,
-  verifyRole(["admin"]),
+  verifyRole(["admin", "teacher"]),
   bookingController.reject
 );
 

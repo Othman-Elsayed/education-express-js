@@ -4,9 +4,18 @@ const Price = require("../modules/Price");
 const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const Booking = require("../modules/Booking");
-const getAll = asyncHandler(async (req, res) => {
-  const { size, page, ...others } = req.query;
-  const lessons = await Lesson.find({ ...others }).populate({
+
+const getByStudent = asyncHandler(async (req, res) => {
+  const { status = "booked" } = req.query;
+  const student = req.user._id;
+  const lessons = await Lesson.find({
+    $and: [
+      { status },
+      {
+        $or: [{ studentsBooked: student }, { studentsRequests: student }],
+      },
+    ],
+  }).populate({
     path: "teacher subject studentsBooked studentsRequests",
     select: "name img",
     populate: {
@@ -18,7 +27,45 @@ const getAll = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiSuccess("Fetch lessons successfully.", lessons));
 });
-
+const getByTeacher = asyncHandler(async (req, res) => {
+  const teacher = req.user._id;
+  const lessons = await Lesson.find({
+    teacher,
+    status: { $ne: "removed" },
+  }).populate({
+    path: "teacher subject studentsBooked studentsRequests",
+    select: "name img",
+    populate: {
+      path: "img",
+      select: "fileName",
+    },
+  });
+  return res
+    .status(200)
+    .json(new ApiSuccess("Fetch lessons successfully.", lessons));
+});
+const getShowInProfile = asyncHandler(async (req, res) => {
+  const { teacher } = req.query;
+  const lessons = await Lesson.find({
+    $and: [
+      { teacher },
+      { status: { $ne: "removed" } },
+      {
+        $or: [{ status: "notbooked" }, { status: "booked", isGroup: true }],
+      },
+    ],
+  }).populate({
+    path: "teacher subject studentsBooked studentsRequests",
+    select: "name img",
+    populate: {
+      path: "img",
+      select: "fileName",
+    },
+  });
+  return res
+    .status(200)
+    .json(new ApiSuccess("Fetch lessons successfully.", lessons));
+});
 const getById = asyncHandler(async (req, res) => {
   let lessons = await Lesson.findById(req.query._id).populate({
     path: "teacher subject studentsBooked studentsRequests",
@@ -30,10 +77,17 @@ const getById = asyncHandler(async (req, res) => {
   });
   return res.json(new ApiSuccess("Fetch lessons successfully.", lessons));
 });
-
 const create = asyncHandler(async (req, res) => {
-  const { teacher, price, subject, day, startDate, endDate, isGroup } =
-    req.body;
+  const {
+    teacher,
+    price,
+    subject,
+    groupLength,
+    day,
+    startDate,
+    endDate,
+    isGroup,
+  } = req.body;
   const findPrice = await Price.findById(price);
   let payload = {
     teacher,
@@ -46,14 +100,14 @@ const create = asyncHandler(async (req, res) => {
   };
   if (
     ["teacher", "admin"].includes(req.user.role) &&
-    +req.user.evaluation >= 5
+    +req.user.evaluation >= 3
   ) {
     payload.isGroup = isGroup;
+    payload.groupLength = groupLength;
   }
   const lesson = await Lesson.create(payload);
   return res.json(new ApiSuccess("Created lesson successfully", lesson));
 });
-
 const update = asyncHandler(async (req, res, next) => {
   const { _id, subject, day, startDate, endDate, isGroup } = req.body;
   const findLesson = await Lesson.findById(_id);
@@ -87,24 +141,9 @@ const update = asyncHandler(async (req, res, next) => {
   });
   return res.json(new ApiSuccess("Updated lesson successfully", lesson));
 });
-
 const finishedLesson = asyncHandler(async (req, res, next) => {
   const { lesson } = req.body;
   const findLesson = await Lesson.findById(lesson).populate("price");
-
-  if (findLesson.sessions <= 0) {
-    await Lesson.findByIdAndUpdate(
-      lesson,
-      {
-        sessions: +findLesson.sessions === 0 ? 0 : +findLesson.sessions - 1,
-        studentsBooked: [],
-        status: "notbooked",
-      },
-      { new: true }
-    );
-    return next(new ApiError("Please renew your reservation first."));
-  }
-
   const daysOfWeek = [
     "Sunday",
     "Monday",
@@ -114,7 +153,6 @@ const finishedLesson = asyncHandler(async (req, res, next) => {
     "Friday",
     "Saturday",
   ];
-
   const now = new Date();
   const hours = now.getHours();
   const minutes = now.getMinutes();
@@ -156,6 +194,9 @@ const finishedLesson = asyncHandler(async (req, res, next) => {
         lesson,
         {
           sessions: +findLesson.sessions === 0 ? 0 : +findLesson.sessions - 1,
+          studentsBooked: [],
+          status: "notbooked",
+          bookingDate: "",
         },
         { new: true }
       );
@@ -167,17 +208,17 @@ const finishedLesson = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Status Lesson: The lesson has not started yet."));
   }
 });
-
 const remove = asyncHandler(async (req, res, next) => {
   const id = req.query._id;
   const getLesson = await Lesson.findById(id);
+  const bookings = await Booking.find({ lesson: id });
+
   const isBooked = Boolean(
     getLesson.status?.toString()?.toLowerCase()?.trim() === "booked"
   );
   if (isBooked) {
     return next(new ApiError("You cannot delete booked sessions."));
   }
-  console.log(req.user._id, getLesson.teacher, req.user.role);
 
   if (
     req.user.role !== "teacher" ||
@@ -185,8 +226,15 @@ const remove = asyncHandler(async (req, res, next) => {
   ) {
     return next(new ApiError("You cannot delete other teacher's lessons."));
   }
-  await Booking.findOneAndDelete({ lesson: id });
-  await Lesson.findByIdAndDelete(id);
+
+  if (bookings?.length) {
+    await Lesson.findByIdAndUpdate(id, { status: "removed" }, { new: true });
+  } else {
+    await Lesson.findByIdAndDelete(id);
+  }
+
+  await Booking.updateMany({ lesson: id }, { status: "removedlesson" });
+
   return res.json(new ApiSuccess("Deleted lesson successfully"));
 });
 
@@ -196,5 +244,7 @@ module.exports = {
   update,
   remove,
   finishedLesson,
-  getAll,
+  getShowInProfile,
+  getByStudent,
+  getByTeacher,
 };

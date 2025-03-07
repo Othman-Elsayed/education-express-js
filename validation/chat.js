@@ -27,7 +27,7 @@ const create = [
     .custom(async (id) => {
       const exists = await User.findById(id);
       if (!exists || exists?.role !== "student") {
-        return new Error(`student with ID ${id} does not exist.`);
+        throw new Error(`student with ID ${id} does not exist.`);
       }
     }),
   check("teacher")
@@ -38,7 +38,7 @@ const create = [
     .custom(async (id) => {
       const exists = await User.findById(id);
       if (!exists || exists?.role !== "teacher") {
-        return new Error(`teacher with ID ${id} does not exist.`);
+        throw new Error(`teacher with ID ${id} does not exist.`);
       }
     }),
   validatorMiddlewares,
@@ -62,7 +62,7 @@ const update = [
     .custom(async (id) => {
       const exists = await User.findById(id);
       if (!exists || exists?.role !== "student") {
-        return new Error(`student with ID ${id} does not exist.`);
+        throw new Error(`student with ID ${id} does not exist.`);
       }
     }),
   check("teacher")
@@ -72,7 +72,7 @@ const update = [
     .custom(async (id) => {
       const exists = await User.findById(id);
       if (!exists || exists?.role !== "teacher") {
-        return new Error(`teacher with ID ${id} does not exist.`);
+        throw new Error(`teacher with ID ${id} does not exist.`);
       }
     }),
   validatorMiddlewares,

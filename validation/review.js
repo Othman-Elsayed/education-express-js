@@ -11,8 +11,8 @@ const create = [
     .withMessage("teacher _id must be valid MongoDB ObjectID.")
     .custom(async (id) => {
       const exists = await User.findById(id);
-      if (!exists || User?.role !== "teacher") {
-        return new Error(`teacher with ID ${id} does not exist.`);
+      if (!exists || exists?.role !== "teacher") {
+        throw new Error(`teacher with ID ${id} does not exist.`);
       }
     }),
   check("writer")
@@ -23,7 +23,7 @@ const create = [
     .custom(async (id) => {
       const exists = await User.findById(id);
       if (!exists) {
-        return new Error(`Writer with ID ${id} does not exist.`);
+        throw new Error(`Writer with ID ${id} does not exist.`);
       }
     }),
   check("comment").notEmpty().withMessage("comment is required."),
@@ -48,8 +48,8 @@ const update = [
     .withMessage("teacher _id must be valid MongoDB ObjectID.")
     .custom(async (id) => {
       const exists = await User.findById(id);
-      if (!exists || User?.role !== "teacher") {
-        return new Error(`teacher with ID ${id} does not exist.`);
+      if (!exists || exists?.role !== "teacher") {
+        throw new Error(`teacher with ID ${id} does not exist.`);
       }
     }),
   check("writer")
@@ -59,7 +59,7 @@ const update = [
     .custom(async (id) => {
       const exists = await User.findById(id);
       if (!exists) {
-        return new Error(`Writer with ID ${id} does not exist.`);
+        throw new Error(`Writer with ID ${id} does not exist.`);
       }
     }),
   validatorMiddlewares,
@@ -73,8 +73,8 @@ const getByTeacher = [
     .withMessage("must be valid MongoDB ObjectID.")
     .custom(async (id) => {
       const exists = await User.findById(id);
-      if (!exists || User?.role !== "teacher") {
-        return new Error(`teacher with ID ${id} does not exist.`);
+      if (!exists || exists?.role !== "teacher") {
+        throw new Error(`teacher with ID ${id} does not exist.`);
       }
     }),
   validatorMiddlewares,

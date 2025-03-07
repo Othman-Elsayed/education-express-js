@@ -42,13 +42,21 @@ const Lessons = new mongoose.Schema(
       type: String,
       require: [true, "End Time is required"],
     },
+    bookingDate: {
+      type: String,
+      require: [true, "Booking Date is required"],
+    },
     isGroup: {
       type: Boolean,
       default: false,
     },
+    groupLength: {
+      type: Number,
+      default: 0,
+    },
     status: {
       type: String,
-      enum: ["booked", "notbooked"],
+      enum: ["booked", "removed", "notbooked"],
       default: "notbooked",
       lowercaseL: true,
       trim: true,

@@ -1,7 +1,29 @@
 const asyncHandler = require("express-async-handler");
 const Review = require("../modules/Review");
+const User = require("../modules/User");
 const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
+
+const handleRating = async (teacher) => {
+  try {
+    const calculateEvaluation = (ratings) => {
+      if (ratings.length === 0) return 0;
+      const total = ratings.reduce((sum, rating) => sum + rating, 0);
+      const average = total / ratings.length;
+      return Math.round(average * 100) / 100;
+    };
+    const result = await Review.find({ teacher }).select("rating").lean();
+    const ratings = result?.map((e) => e?.rating);
+    await User.findByIdAndUpdate(
+      teacher,
+      { evaluation: calculateEvaluation(ratings) },
+      { new: true }
+    );
+    return;
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 const getByTeacher = asyncHandler(async (req, res) => {
   const reviews = await Review.find({ teacher: req.query._id })
@@ -11,6 +33,7 @@ const getByTeacher = asyncHandler(async (req, res) => {
     });
   return res.json(new ApiSuccess("Fetch reviews successfully.", reviews));
 });
+
 const getAll = asyncHandler(async (req, res) => {
   const reviews = await Review.find({})
     .populate({
@@ -36,6 +59,7 @@ const create = asyncHandler(async (req, res) => {
     comment,
     rating,
   });
+  handleRating(teacher);
   return res.json(new ApiSuccess("Created review successfully", review));
 });
 
@@ -50,6 +74,7 @@ const update = asyncHandler(async (req, res, next) => {
         new: true,
       }
     );
+    handleRating(findReview?.teacher);
     return res.json(new ApiSuccess("Updated review successfully", review));
   }
   return next(new ApiError("Cant edit this review"));
@@ -59,6 +84,7 @@ const remove = asyncHandler(async (req, res, next) => {
   const review = await Review.findById(req.query._id);
   if (Boolean(review?.writer?.toString() === req.user?._id?.toString())) {
     await Review.findByIdAndDelete(req.query._id);
+    handleRating(review?.teacher);
     return res.json(new ApiSuccess("Deleted review successfully", review));
   }
   return next(new ApiError("Cant remove this review"));

@@ -33,7 +33,7 @@ const create = [
     .custom(async (id) => {
       const exists = await User.findById(id);
       if (!exists && exists.role !== "teacher") {
-        return new Error(`invalid teacher id.`);
+        throw new Error(`invalid teacher id.`);
       }
     }),
   check("price")
