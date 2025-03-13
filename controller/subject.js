@@ -1,8 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const Subject = require("../modules/Subject");
 const ApiSuccess = require("../utils/apiSuccess");
-const uploadController = require("./upload");
 const ApiError = require("../utils/apiError");
+const cloudinary = require("cloudinary").v2;
 
 const getAll = asyncHandler(async (req, res) => {
   const subjects = await Subject.find().populate("img");
@@ -25,16 +25,11 @@ const update = asyncHandler(async (req, res) => {
   return res.json(new ApiSuccess("Updated subject successfully", subject));
 });
 const remove = asyncHandler(async (req, res, next) => {
-  const subject = await Subject.findById(req.query._id).populate("img");
+  const subject = await Subject.findById(req.query._id);
   if (!subject) {
     return next(new ApiError("Subject not found", 404));
   }
-  if (Boolean(subject.img)) {
-    req.body.owner = subject.img.owner;
-    req.body.fileName = subject.img.fileName;
-
-    await uploadController.remove(req, res, next);
-  }
+  await cloudinary.uploader.destroy(subject.img?.public_id);
   await Subject.findByIdAndDelete(req.query._id);
   return res.json(
     new ApiSuccess("Deleted subject and related file successfully", subject)

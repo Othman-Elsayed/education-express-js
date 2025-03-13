@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const Level = require("../modules/Level");
 const ApiSuccess = require("../utils/apiSuccess");
-const uploadController = require("./upload");
+const cloudinary = require("cloudinary").v2;
 
 const getAll = asyncHandler(async (req, res) => {
   const levels = await Level.find().populate("img");
@@ -24,16 +24,11 @@ const update = asyncHandler(async (req, res) => {
   return res.json(new ApiSuccess("Updated level successfully", level));
 });
 const remove = asyncHandler(async (req, res, next) => {
-  const level = await Level.findById(req.query._id).populate("img");
+  const level = await Level.findById(req.query._id);
   if (!level) {
     return next(new ApiError("Level not found", 404));
   }
-  if (Boolean(level.img)) {
-    req.body.owner = level.img.owner;
-    req.body.fileName = level.img.fileName;
-
-    await uploadController.remove(req, res, next);
-  }
+  await cloudinary.uploader.destroy(level.img?.public_id);
   await Level.findByIdAndDelete(req.query._id);
   return res.json(new ApiSuccess("Deleted level successfully", level));
 });

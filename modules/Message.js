@@ -21,7 +21,14 @@ const MessageSchema = new mongoose.Schema(
       type: String,
     },
     img: {
-      type: String,
+      public_id: {
+        type: String,
+        default: null,
+      },
+      url: {
+        type: String,
+        default: null,
+      },
     },
     isRead: {
       type: Boolean,

@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const EducationSystem = require("../modules/EducationSystem");
 const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
-const uploadController = require("./upload");
+const cloudinary = require("cloudinary").v2;
 
 const getAll = asyncHandler(async (req, res) => {
   const educationSystem = await EducationSystem.find()
@@ -43,16 +43,11 @@ const update = asyncHandler(async (req, res) => {
   );
 });
 const remove = asyncHandler(async (req, res, next) => {
-  const system = await EducationSystem.findById(req.query._id).populate("img");
+  const system = await EducationSystem.findById(req.query._id);
   if (!system) {
     return next(new ApiError("System not found"));
   }
-  if (Boolean(system.img)) {
-    req.body.owner = system.img.owner;
-    req.body.fileName = system.img.fileName;
-
-    await uploadController.remove(req, res, next);
-  }
+  await cloudinary.uploader.destroy(system.img?.public_id);
   await EducationSystem.findByIdAndDelete(req.query._id);
   return res.json(
     new ApiSuccess("Deleted education system successfully", system)

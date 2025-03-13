@@ -65,8 +65,14 @@ const UserSchema = new mongoose.Schema(
       type: String,
     },
     img: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Upload",
+      public_id: {
+        type: String,
+        default: null,
+      },
+      url: {
+        type: String,
+        default: null,
+      },
     },
     ban: {
       type: String,

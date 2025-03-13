@@ -50,7 +50,7 @@ const remove = asyncHandler(async (req, res, next) => {
   }
   if (Boolean(price.img)) {
     req.body.owner = price.img.owner;
-    req.body.fileName = price.img.fileName;
+    req.bodyurl = price.imgurl;
     await uploadController.remove(req, res, next);
   }
   await Price.findByIdAndDelete(req.query._id);

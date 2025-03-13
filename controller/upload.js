@@ -5,33 +5,44 @@ const path = require("path");
 const ApiError = require("../utils/apiError");
 const Upload = require("../modules/Upload");
 const User = require("../modules/User");
+const cloudinary = require("cloudinary").v2;
 
 const create = asyncHandler(async (req, res, next) => {
-  // const owner = req.query.userId;
   const owner = req.user._id;
-  const updateAvatar = req.query.updateAvatar;
+  const file = req.file;
+  const { publicId, updateAvatar } = req.query;
 
-  const findUser = await User.findById(owner);
-  if (!findUser) return next(new ApiError("User id not found!"));
-  const filePath = req.file.path?.toString()?.split("\\").pop();
-  const url = Boolean(filePath) ? filePath : "url not avlibel";
-  if (!url) return next(new ApiError("url not avlibel"));
-  const upload = await Upload.create({
-    fileName: url,
-    owner,
-  });
+  if (!file) return next(new ApiError("Upload failed, no file received."));
 
-  if (updateAvatar) {
-    await User.findByIdAndUpdate(owner, {
-      img: upload._id || findUser.img,
-    });
+  const result = {
+    public_id: file.filename,
+    url: file.path,
+  };
+
+  if (publicId) {
+    await cloudinary.uploader.destroy(publicId);
   }
 
-  return res.json(new ApiSuccess("Upload successfully", upload));
+  console.log(publicId);
+
+  if (updateAvatar) {
+    let x = await User.findByIdAndUpdate(
+      owner,
+      {
+        img: result,
+      },
+      { new: true }
+    );
+  }
+
+  return res.json(new ApiSuccess("Upload successful", result));
 });
+
+module.exports = { create };
+
 const remove = asyncHandler(async (req, res, next) => {
   const owner = req.user._id;
-  const { fileName } = req.query;
+  const { public_id } = req.query;
   const filePath = path.join(__dirname, "..", "uploads", fileName);
   if (!fs.existsSync(filePath)) {
     return next(new ApiError("File not found"));
