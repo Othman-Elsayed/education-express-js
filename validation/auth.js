@@ -27,12 +27,12 @@ const register = [
         throw new Error(`Subject with ID ${id} does not exist.`);
       }
     }),
-  check("EducationSystem")
+  check("educationSystems")
     .notEmpty()
     .withMessage("EducationSystem is required")
     .isArray()
     .withMessage("EducationSystem must be array"),
-  check("EducationSystem.*")
+  check("educationSystems.*")
     .optional()
     .isMongoId()
     .withMessage("All educationSystem must be valid MongoDB ObjectIDs.")

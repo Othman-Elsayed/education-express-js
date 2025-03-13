@@ -7,7 +7,10 @@ const Upload = require("../modules/Upload");
 const User = require("../modules/User");
 
 const create = asyncHandler(async (req, res, next) => {
-  const owner = req.query.userId;
+  // const owner = req.query.userId;
+  const owner = req.user._id;
+  const updateAvatar = req.query.updateAvatar;
+
   const findUser = await User.findById(owner);
   if (!findUser) return next(new ApiError("User id not found!"));
   const filePath = req.file.path?.toString()?.split("\\").pop();
@@ -17,10 +20,18 @@ const create = asyncHandler(async (req, res, next) => {
     fileName: url,
     owner,
   });
+
+  if (updateAvatar) {
+    await User.findByIdAndUpdate(owner, {
+      img: upload._id || findUser.img,
+    });
+  }
+
   return res.json(new ApiSuccess("Upload successfully", upload));
 });
 const remove = asyncHandler(async (req, res, next) => {
-  const { owner, fileName } = req.body;
+  const owner = req.user._id;
+  const { fileName } = req.query;
   const filePath = path.join(__dirname, "..", "uploads", fileName);
   if (!fs.existsSync(filePath)) {
     return next(new ApiError("File not found"));

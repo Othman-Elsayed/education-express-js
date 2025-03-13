@@ -5,6 +5,7 @@ const Chat = require("../modules/Chat");
 const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const User = require("../modules/User");
+const Statistics = require("../modules/Statistics");
 
 const get = asyncHandler(async (req, res) => {
   const { page = 1, size = 10, ...queryOther } = req.query;
@@ -99,7 +100,11 @@ const send = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Invalid student id."));
   }
 
-  if (findLesson.studentsBooked.length >= findLesson.groupLength) {
+  if (
+    findLesson.studentsBooked.length >= findLesson.groupLength &&
+    findLesson.isGroup === true &&
+    findLesson.groupLength >= 1
+  ) {
     return next(new ApiError("Sorry, the group members are full."));
   }
 
@@ -189,7 +194,9 @@ const cancel = asyncHandler(async (req, res, next) => {
 const accepted = asyncHandler(async (req, res, next) => {
   const { teacher, student, lesson, booking } = req.body;
 
-  const findLesson = await Lesson.findById(lesson);
+  const findLesson = await Lesson.findById(lesson).populate(
+    "price subject teacher"
+  );
   if (!findLesson) {
     return next(new ApiError("This Lesson not found."));
   }
@@ -198,7 +205,11 @@ const accepted = asyncHandler(async (req, res, next) => {
     return next(new ApiError("This Lesson already booked."));
   }
 
-  if (findLesson.studentsBooked.length >= findLesson.groupLength) {
+  if (
+    findLesson.studentsBooked.length >= findLesson.groupLength &&
+    findLesson.isGroup === true &&
+    findLesson.groupLength >= 1
+  ) {
     return next(new ApiError("Sorry, the group members are full."));
   }
 
@@ -231,6 +242,34 @@ const accepted = asyncHandler(async (req, res, next) => {
     });
   }
 
+  // Statistic
+  const findStatistic = await Statistics.findOne({ teacher });
+  const price = findLesson?.price;
+  if (findStatistic) {
+    await Statistics.findByIdAndUpdate(
+      findStatistic._id,
+      {
+        $addToSet: { students: student },
+        $push: { sessions: lesson },
+        $inc: {
+          teacherPrice: price?.teacher || 0,
+          studentPrice: price?.fullFees || 0,
+          platformPrice: price?.platform || 0,
+        },
+      },
+      { new: true }
+    );
+  } else {
+    await Statistics.create({
+      teacher,
+      students: [student],
+      sessions: [lesson],
+      teacherPrice: price?.teacher || 0,
+      studentPrice: price?.fullFees || 0,
+      platformPrice: price?.platform || 0,
+    });
+  }
+
   // Results
   return res.json(new ApiSuccess("Booking has been accepted successfully. 🎉"));
 });
@@ -238,7 +277,7 @@ const accepted = asyncHandler(async (req, res, next) => {
 const reject = asyncHandler(async (req, res, next) => {
   const { student, teacher, lesson, booking } = req.body;
 
-  const findLesson = await Lesson.findById(lesson);
+  const findLesson = await Lesson.findById(lesson).populate("subject teacher");
   if (
     !findLesson.studentsRequests.includes(student) ||
     findLesson.teacher.toString() !== teacher

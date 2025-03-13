@@ -4,7 +4,14 @@ const ApiSuccess = require("../utils/apiSuccess");
 
 const getAll = asyncHandler(async (req, res) => {
   const chats = await Chat.find({ members: req.user._id })
-    .populate({ path: "members", select: "name role" })
+    .populate({
+      path: "members",
+      select: "name img role",
+      populate: {
+        path: "img",
+        select: "fileName -_id",
+      },
+    })
     .populate({
       path: "lastMsg",
       select: "text isRead sender createdAt",

@@ -34,6 +34,8 @@ const chatValidation = require("../validation/chat");
 const reviewController = require("../controller/review");
 const reviewValidation = require("../validation/review");
 
+const statisticsController = require("../controller/statistic");
+
 const uploadFile = require("../utils/uploadFile");
 const uploadController = require("../controller/upload");
 
@@ -242,6 +244,18 @@ router.delete(
 );
 
 // Booking
+router.get(
+  "/statistics",
+  verifyToken,
+  verifyRole(["admin"]),
+  statisticsController.getStatistic
+);
+router.get(
+  "/statistics/totals",
+  verifyToken,
+  verifyRole(["admin"]),
+  statisticsController.getTotals
+);
 router.get("/bookings", verifyToken, bookingController.get);
 router.get("/booking", verifyToken, bookingController.byId);
 router.post(
@@ -300,7 +314,12 @@ router.delete(
 );
 
 // Uploads
-router.post("/upload", uploadFile.single("file"), uploadController.create);
-router.delete("/file", uploadController.remove);
+router.post(
+  "/upload",
+  verifyToken,
+  uploadFile.single("file"),
+  uploadController.create
+);
+router.delete("/file", verifyToken, uploadController.remove);
 
 module.exports = router;

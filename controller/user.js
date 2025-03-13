@@ -3,7 +3,35 @@ const ApiSuccess = require("../utils/apiSuccess");
 const asyncHandler = require("express-async-handler");
 
 const getTeachers = asyncHandler(async (req, res) => {
-  let users = await User.find({ role: "teacher" })
+  const {
+    page,
+    size,
+    search,
+    subjects = [],
+    levels = [],
+    systems = [],
+  } = req.query;
+  const filter = { role: "teacher" };
+
+  const convertToArray = (str) => str?.split(",") || [];
+
+  if (subjects.length > 0) {
+    filter.subjects = { $in: convertToArray(subjects) };
+  }
+
+  if (levels.length > 0) {
+    filter.levels = { $in: convertToArray(levels) };
+  }
+
+  if (systems.length > 0) {
+    filter.educationSystems = {
+      $in: convertToArray(systems),
+    };
+  }
+  if (search) {
+    filter.name = { $regex: search, $options: "i" };
+  }
+  let users = await User.find(filter)
     .populate({
       path: "educationSystems",
       select: "name levels -_id",
@@ -14,6 +42,7 @@ const getTeachers = asyncHandler(async (req, res) => {
     })
     .populate("subjects levels img")
     .exec();
+
   return res.json(new ApiSuccess("fetch users successfully", users));
 });
 

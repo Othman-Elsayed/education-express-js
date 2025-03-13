@@ -4,6 +4,7 @@ const Price = require("../modules/Price");
 const ApiSuccess = require("../utils/apiSuccess");
 const ApiError = require("../utils/apiError");
 const Booking = require("../modules/Booking");
+const Notification = require("../modules/Notification");
 
 const getByStudent = asyncHandler(async (req, res) => {
   const { status = "booked" } = req.query;
@@ -16,16 +17,14 @@ const getByStudent = asyncHandler(async (req, res) => {
       },
     ],
   }).populate({
-    path: "teacher subject studentsBooked studentsRequests",
-    select: "name img",
+    path: "teacher subject price studentsBooked studentsRequests",
+    select: "name img sessions",
     populate: {
       path: "img",
       select: "fileName",
     },
   });
-  return res
-    .status(200)
-    .json(new ApiSuccess("Fetch lessons successfully.", lessons));
+  return res.json(new ApiSuccess("Fetch lessons successfully.", lessons));
 });
 const getByTeacher = asyncHandler(async (req, res) => {
   const teacher = req.user._id;
@@ -33,16 +32,14 @@ const getByTeacher = asyncHandler(async (req, res) => {
     teacher,
     status: { $ne: "removed" },
   }).populate({
-    path: "teacher subject studentsBooked studentsRequests",
-    select: "name img",
+    path: "teacher subject price studentsBooked studentsRequests",
+    select: "name img sessions",
     populate: {
       path: "img",
       select: "fileName",
     },
   });
-  return res
-    .status(200)
-    .json(new ApiSuccess("Fetch lessons successfully.", lessons));
+  return res.json(new ApiSuccess("Fetch lessons successfully.", lessons));
 });
 const getShowInProfile = asyncHandler(async (req, res) => {
   const { teacher } = req.query;
@@ -55,20 +52,18 @@ const getShowInProfile = asyncHandler(async (req, res) => {
       },
     ],
   }).populate({
-    path: "teacher subject studentsBooked studentsRequests",
-    select: "name img",
+    path: "teacher subject price studentsBooked studentsRequests",
+    select: "name img sessions",
     populate: {
       path: "img",
       select: "fileName",
     },
   });
-  return res
-    .status(200)
-    .json(new ApiSuccess("Fetch lessons successfully.", lessons));
+  return res.json(new ApiSuccess("Fetch lessons successfully.", lessons));
 });
 const getById = asyncHandler(async (req, res) => {
   let lessons = await Lesson.findById(req.query._id).populate({
-    path: "teacher subject studentsBooked studentsRequests",
+    path: "teacher subject price studentsBooked studentsRequests",
     select: "name img",
     populate: {
       path: "img",
@@ -98,6 +93,7 @@ const create = asyncHandler(async (req, res) => {
     endDate,
     sessions: findPrice?.sessions,
   };
+
   if (
     ["teacher", "admin"].includes(req.user.role) &&
     +req.user.evaluation >= 3
@@ -141,73 +137,172 @@ const update = asyncHandler(async (req, res, next) => {
   });
   return res.json(new ApiSuccess("Updated lesson successfully", lesson));
 });
-const finishedLesson = asyncHandler(async (req, res, next) => {
-  const { lesson } = req.body;
-  const findLesson = await Lesson.findById(lesson).populate("price");
-  const daysOfWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
+// const finishedLesson = asyncHandler(async (req, res, next) => {
+//   const { lesson } = req.body;
+//   const findLesson = await Lesson.findById(lesson).populate("price");
+//   const daysOfWeek = [
+//     "Sunday",
+//     "Monday",
+//     "Tuesday",
+//     "Wednesday",
+//     "Thursday",
+//     "Friday",
+//     "Saturday",
+//   ];
+//   const now = new Date();
+//   const hours = now.getHours();
+//   const minutes = now.getMinutes();
+//   const formattedHours = String(hours).padStart(2, "0");
+//   const formattedMinutes = String(minutes).padStart(2, "0");
+//   const curr = `${formattedHours}:${formattedMinutes}`;
+
+//   const hourStartTime = +findLesson.startDate.slice(0, 2);
+//   const minutesStartTime = +findLesson.startDate.slice(3, 5);
+//   const hourEndTime = +findLesson.endDate.slice(0, 2);
+//   const minutesEndTime = +findLesson.endDate.slice(3, 5);
+
+//   const hourCurrentTime = +curr.slice(0, 2);
+//   const minutesCurrentTime = +curr.slice(3, 5);
+
+//   const currentDayIndex = now.getDay();
+//   const targetDayIndex = daysOfWeek.findIndex(
+//     (d) => d.toLowerCase() === findLesson.day.toLowerCase()
+//   );
+
+//   if (targetDayIndex === -1) {
+//     return next(new ApiError("The specified day is invalid."));
+//   }
+
+//   if (currentDayIndex === targetDayIndex) {
+//     if (
+//       hourCurrentTime < hourStartTime ||
+//       (hourCurrentTime === hourStartTime &&
+//         minutesCurrentTime < minutesStartTime)
+//     ) {
+//       return next(
+//         new ApiError("Status Lesson: The lesson has not started yet..")
+//       );
+//     } else if (
+//       hourCurrentTime > hourEndTime ||
+//       (hourCurrentTime === hourEndTime && minutesCurrentTime >= minutesEndTime)
+//     ) {
+//       let lessonUpdate;
+//       if (+findLesson.sessions > 1) {
+//         lessonUpdate = await Lesson.findByIdAndUpdate(
+//           lesson,
+//           {
+//             $inc: { sessions: -1 },
+//             $set: { bookingDate: new Date(Date.now() + 2 * 60 * 1000) },
+//           },
+//           { new: true }
+//         );
+//       } else {
+//         lessonUpdate = await Lesson.findByIdAndUpdate(
+//           lesson,
+//           {
+//             sessions: +findLesson.price.sessions,
+//             studentsBooked: [],
+//             status: "notbooked",
+//             bookingDate: "",
+//           },
+//           { new: true }
+//         );
+//       }
+//       return res.json(new ApiSuccess("Status Lesson", lessonUpdate));
+//     } else {
+//       return next(new ApiError("Status Lesson: Lesson is running."));
+//     }
+//   } else {
+//     return next(new ApiError("Status Lesson: The lesson has not started yet."));
+//   }
+// });
+
+function handleCheck({ day, startTime, endTime }) {
   const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const formattedHours = String(hours).padStart(2, "0");
-  const formattedMinutes = String(minutes).padStart(2, "0");
-  const curr = `${formattedHours}:${formattedMinutes}`;
+  const currentDay = now
+    .toLocaleString("en-US", { weekday: "long" })
+    .toLowerCase();
 
-  const hourStartTime = +findLesson.startDate.slice(0, 2);
-  const minutesStartTime = +findLesson.startDate.slice(3, 5);
-  const hourEndTime = +findLesson.endDate.slice(0, 2);
-  const minutesEndTime = +findLesson.endDate.slice(3, 5);
-
-  const hourCurrentTime = +curr.slice(0, 2);
-  const minutesCurrentTime = +curr.slice(3, 5);
-
-  const currentDayIndex = now.getDay();
-  const targetDayIndex = daysOfWeek.findIndex(
-    (d) => d.toLowerCase() === findLesson.day.toLowerCase()
-  );
-
-  if (targetDayIndex === -1) {
-    return next(new ApiError("The specified day is invalid."));
+  if (currentDay !== day.toLowerCase()) {
+    return "invalid-day";
   }
 
-  if (currentDayIndex === targetDayIndex) {
-    if (
-      hourCurrentTime < hourStartTime ||
-      (hourCurrentTime === hourStartTime &&
-        minutesCurrentTime < minutesStartTime)
-    ) {
-      return next(
-        new ApiError("Status Lesson: The lesson has not started yet..")
-      );
-    } else if (
-      hourCurrentTime > hourEndTime ||
-      (hourCurrentTime === hourEndTime && minutesCurrentTime >= minutesEndTime)
-    ) {
-      const lessonUpdate = await Lesson.findByIdAndUpdate(
+  const [startHour, startMinute] = startTime.split(":").map(Number);
+  const [endHour, endMinute] = endTime.split(":").map(Number);
+  const startDate = new Date(now);
+  startDate.setHours(startHour, startMinute, 0, 0);
+  const endDate = new Date(now);
+  endDate.setHours(endHour, endMinute, 0, 0);
+
+  if (now < startDate) {
+    return "pending";
+  } else if (now >= startDate && now < endDate) {
+    return "progress";
+  } else {
+    return "finished";
+  }
+}
+
+const finishedLesson = asyncHandler(async (req, res, next) => {
+  const { lesson } = req.body;
+
+  const findLesson = await Lesson.findById(lesson).populate("price subject");
+  if (!findLesson) return next(new ApiError("Lesson dose not exist."));
+
+  const {
+    day,
+    startDate: startTime,
+    endDate: endTime,
+    bookingDate,
+  } = findLesson;
+  const bookingDateTime = new Date(bookingDate);
+
+  const [endHour, endMinute] = endTime.split(":").map(Number);
+  const endDate = new Date(bookingDateTime);
+  endDate.setHours(endHour, endMinute, 0, 0);
+
+  if (bookingDateTime > endDate) {
+    return next(new ApiError("Lesson is pending."));
+  }
+
+  const status = handleCheck({ day, startTime, endTime });
+  if (status === "finished") {
+    let lessonUpdate;
+    if (+findLesson.sessions > 1) {
+      lessonUpdate = await Lesson.findByIdAndUpdate(
         lesson,
         {
-          sessions: +findLesson.sessions === 0 ? 0 : +findLesson.sessions - 1,
+          $inc: { sessions: -1 },
+          $set: { bookingDate: new Date(Date.now() + 2 * 60 * 1000) },
+        },
+        { new: true }
+      );
+      await Notification.create({
+        to: [findLesson.teacher, ...findLesson.studentsBooked],
+        msg: `The lesson is over and there are ${lessonUpdate?.sessions} sessions left.`,
+      });
+    } else {
+      await Notification.create({
+        to: [findLesson.teacher, ...findLesson.studentsBooked],
+        msg: `The lesson ${findLesson.subject.name} is over.`,
+      });
+      lessonUpdate = await Lesson.findByIdAndUpdate(
+        lesson,
+        {
+          sessions: +findLesson.price.sessions,
           studentsBooked: [],
           status: "notbooked",
           bookingDate: "",
         },
         { new: true }
       );
-      return res.json(new ApiSuccess("Status Lesson", lessonUpdate));
-    } else {
-      return next(new ApiError("Status Lesson: Lesson is running."));
     }
+    return res.json(new ApiSuccess("Lesson Finished Success.", lessonUpdate));
   } else {
-    return next(new ApiError("Status Lesson: The lesson has not started yet."));
+    return next(new ApiError("Lesson is progress or pending."));
   }
 });
+
 const remove = asyncHandler(async (req, res, next) => {
   const id = req.query._id;
   const getLesson = await Lesson.findById(id);
@@ -233,7 +328,10 @@ const remove = asyncHandler(async (req, res, next) => {
     await Lesson.findByIdAndDelete(id);
   }
 
-  await Booking.updateMany({ lesson: id }, { status: "removedlesson" });
+  await Booking.updateMany(
+    { lesson: id, status: "pending" },
+    { status: "removedlesson" }
+  );
 
   return res.json(new ApiSuccess("Deleted lesson successfully"));
 });

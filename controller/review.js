@@ -27,7 +27,14 @@ const handleRating = async (teacher) => {
 
 const getByTeacher = asyncHandler(async (req, res) => {
   const reviews = await Review.find({ teacher: req.query._id })
-    .populate("writer", "name img")
+    .populate({
+      path: "writer teacher",
+      select: "name img",
+      populate: {
+        path: "img",
+        select: "fileName",
+      },
+    })
     .sort({
       createdAt: -1,
     });
@@ -35,7 +42,7 @@ const getByTeacher = asyncHandler(async (req, res) => {
 });
 
 const getAll = asyncHandler(async (req, res) => {
-  const reviews = await Review.find({})
+  const reviews = await Review.find()
     .populate({
       path: "writer teacher",
       select: "name img",
